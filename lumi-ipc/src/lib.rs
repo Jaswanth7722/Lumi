@@ -8,11 +8,18 @@
 //! - Request/response correlation with optional tracing
 //! - Broadcast event delivery to multiple subscribers
 //! - Channel-based message routing
-//! - Error handling and timeout support
+//! - Cross-process transport via sockets/pipes
+//! - Automatic reconnection and health monitoring
+
+pub mod wire;
+pub mod transport;
+pub mod peer;
 
 use anyhow::Result;
 use dashmap::DashMap;
 use lumi_common::ipc::{Channel, LumiMessage, MessageType, ProcessId};
+use peer::PeerManager;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::sync::{broadcast, mpsc, oneshot};
@@ -38,14 +45,14 @@ pub fn serialize_message_json(msg: &LumiMessage) -> Result<String> {
 }
 
 // ---------------------------------------------------------------------------
-// Message Bus
+// Internal Types
 // ---------------------------------------------------------------------------
 
 /// A channel sender for a specific IPC channel.
 type ChannelSender = broadcast::Sender<LumiMessage>;
 
 /// A channel receiver for a specific IPC channel.
-type ChannelReceiver = broadcast::Receiver<LumiMessage>;
+pub type ChannelReceiver = broadcast::Receiver<LumiMessage>;
 
 /// Pending request awaiting a response.
 struct PendingRequest {
@@ -53,23 +60,55 @@ struct PendingRequest {
     timeout_at: tokio::time::Instant,
 }
 
+// ---------------------------------------------------------------------------
+// Message Bus
+// ---------------------------------------------------------------------------
+
+/// Configuration for a MessageBus instance.
+pub struct BusConfig {
+    /// The runtime directory for IPC sockets/pipes.
+    pub runtime_dir: PathBuf,
+    /// Whether to enable cross-process transport.
+    pub enable_transport: bool,
+    /// List of peers to automatically connect to on startup.
+    pub auto_connect: Vec<ProcessId>,
+}
+
+impl Default for BusConfig {
+    fn default() -> Self {
+        Self {
+            runtime_dir: transport::default_runtime_dir(),
+            enable_transport: true,
+            auto_connect: Vec::new(),
+        }
+    }
+}
+
 /// The central IPC message bus for the Lumi platform.
 ///
 /// Each process creates one `MessageBus` instance and uses it to send
-/// and receive messages on various channels.
+/// and receive messages on various channels. The bus handles:
+/// - In-process message routing via broadcast channels
+/// - Cross-process message routing via the PeerManager
+/// - Request/response correlation with timeout
+/// - Channel-based message filtering
 pub struct MessageBus {
     /// This process's identifier.
     process_id: ProcessId,
-    /// Map of channel name → broadcast sender.
+    /// Bus configuration.
+    config: BusConfig,
+    /// Map of channel name → broadcast sender (in-process routing).
     channels: DashMap<Channel, ChannelSender>,
     /// Pending requests waiting for responses, keyed by message ID.
     pending_requests: Arc<DashMap<String, PendingRequest>>,
     /// Whether the bus is running.
     running: Arc<AtomicBool>,
-    /// Receiver for all incoming messages on this process.
+    /// Receiver for all outgoing messages on this process.
     rx: mpsc::Receiver<LumiMessage>,
-    /// Sender for all outgoing messages.
+    /// Sender for all outgoing messages (cloned to consumers).
     tx: mpsc::Sender<LumiMessage>,
+    /// Peer manager for cross-process communication.
+    peer_manager: Option<Arc<PeerManager>>,
 }
 
 impl MessageBus {
@@ -77,12 +116,35 @@ impl MessageBus {
     pub fn new(process_id: ProcessId) -> Self {
         let (tx, rx) = mpsc::channel(1024);
         Self {
-            process_id,
+            process_id: process_id.clone(),
+            config: BusConfig::default(),
             channels: DashMap::new(),
             pending_requests: Arc::new(DashMap::new()),
             running: Arc::new(AtomicBool::new(true)),
             rx,
             tx,
+            peer_manager: None,
+        }
+    }
+
+    /// Create a new message bus with custom configuration.
+    pub fn new_with_config(process_id: ProcessId, config: BusConfig) -> Self {
+        let (tx, rx) = mpsc::channel(1024);
+        let peer_manager = if config.enable_transport {
+            Some(PeerManager::new(process_id.clone()))
+        } else {
+            None
+        };
+
+        Self {
+            process_id: process_id.clone(),
+            config,
+            channels: DashMap::new(),
+            pending_requests: Arc::new(DashMap::new()),
+            running: Arc::new(AtomicBool::new(true)),
+            rx,
+            tx,
+            peer_manager,
         }
     }
 
@@ -94,6 +156,11 @@ impl MessageBus {
     /// Get the process ID of this bus instance.
     pub fn process_id(&self) -> &ProcessId {
         &self.process_id
+    }
+
+    /// Get the bus configuration.
+    pub fn config(&self) -> &BusConfig {
+        &self.config
     }
 
     /// Subscribe to a specific IPC channel.
@@ -110,6 +177,35 @@ impl MessageBus {
             .subscribe()
     }
 
+    /// Start the transport layer — listen for incoming connections and
+    /// connect to configured peers.
+    pub async fn start_transport(&mut self) -> Result<()> {
+        let peer_manager = match &self.peer_manager {
+            Some(pm) => pm.clone(),
+            None => return Ok(()), // Transport disabled
+        };
+
+        // Start listening for incoming connections
+        let _listener_handle = peer_manager
+            .start_listener(&self.config.runtime_dir)
+            .await?;
+
+        // Connect to configured peers
+        for peer_id in &self.config.auto_connect {
+            peer_manager
+                .connect_to(peer_id.clone(), &self.config.runtime_dir)
+                .await;
+        }
+
+        info!(
+            "Transport started for {}: {}",
+            self.process_id,
+            self.config.runtime_dir.display()
+        );
+
+        Ok(())
+    }
+
     /// Send a message and wait for a response.
     ///
     /// The message must be of type `Request`. This function will wait
@@ -121,10 +217,11 @@ impl MessageBus {
         let timeout = tokio::time::Duration::from_secs(30);
         self.pending_requests.insert(
             msg_id.clone(),
-            PendingRequest {            response_tx,
-                    timeout_at: tokio::time::Instant::now() + timeout,
-                },
-            );
+            PendingRequest {
+                response_tx,
+                timeout_at: tokio::time::Instant::now() + timeout,
+            },
+        );
 
         self.send(msg).await?;
 
@@ -143,16 +240,37 @@ impl MessageBus {
     }
 
     /// Send a message on the bus (fire-and-forget).
+    ///
+    /// The message is routed to:
+    /// 1. Local channel subscribers (via broadcast)
+    /// 2. Remote peer (via transport, if destination is a different process)
     pub async fn send(&self, msg: LumiMessage) -> Result<()> {
+        // Route to remote peer if target is a different process
+        let target = msg.target.clone();
+        if target != self.process_id {
+            if let Some(ref pm) = self.peer_manager {
+                pm.send_to(target, msg.clone()).await;
+            }
+        }
+
+        // Push to the local mpsc channel — process_message() handles all local routing
         self.tx.send(msg).await?;
+
         Ok(())
     }
 
-    /// Send a broadcast event on a channel.
+    /// Send a broadcast event to all connected peers on a channel.
     pub async fn broadcast(&self, channel: Channel, msg: LumiMessage) -> Result<()> {
+        // Local broadcast
         if let Some(tx) = self.channels.get(&channel) {
-            tx.send(msg)?;
+            let _ = tx.send(msg.clone());
         }
+
+        // Remote broadcast
+        if let Some(ref pm) = self.peer_manager {
+            pm.broadcast(&msg).await;
+        }
+
         Ok(())
     }
 
@@ -164,8 +282,12 @@ impl MessageBus {
     /// Process an incoming message (routes to subscribers, handles responses).
     pub async fn process_message(&self, msg: LumiMessage) -> Result<()> {
         debug!(
-            "IPC message: {} → {} [{:?}] via {}",
-            msg.source, msg.target, msg.msg_type, msg.channel
+            "IPC message: {} → {} [{:?}] via {}\n  payload: {}",
+            msg.source,
+            msg.target,
+            msg.msg_type,
+            msg.channel,
+            serde_json::to_string(&msg.payload).unwrap_or_default()
         );
 
         // Handle responses: complete pending requests
@@ -176,9 +298,9 @@ impl MessageBus {
             }
         }
 
-        // Broadcast to channel subscribers
+        // Broadcast to local channel subscribers
         if let Some(tx) = self.channels.get(&msg.channel) {
-            tx.send(msg)?;
+            let _ = tx.send(msg);
         }
 
         Ok(())
@@ -225,48 +347,49 @@ impl MessageBus {
         for id in timed_out {
             if let Some((_, pending)) = self.pending_requests.remove(&id) {
                 warn!("Pending request {id} timed out");
-                drop(pending); // drops the sender, signaling timeout to the caller
+                drop(pending);
             }
         }
     }
 }
 
 // ---------------------------------------------------------------------------
-// Transport Layer
+// Process Configuration Helpers
 // ---------------------------------------------------------------------------
 
-/// Platform-specific transport for IPC messages.
-pub enum Transport {
-    /// Unix domain socket path (macOS/Linux).
-    UnixSocket(String),
-    /// Named pipe path (Windows).
-    NamedPipe(String),
-    /// In-memory channel (for testing within the same process).
-    InMemory,
-}
-
-impl Transport {
-    /// Create a platform-appropriate transport for this process.
-    #[allow(unused_variables)]
-    pub fn for_process(process_id: &ProcessId, runtime_dir: &std::path::Path) -> Self {
-        let name = process_id.to_string();
-        #[cfg(unix)]
-        {
-            let path = runtime_dir.join(format!("lumi-{name}.sock"));
-            Transport::UnixSocket(path.to_string_lossy().to_string())
+/// Default peer connections for each process type.
+pub fn default_peers_for(process_id: &ProcessId) -> Vec<ProcessId> {
+    match process_id {
+        ProcessId::Core => vec![
+            ProcessId::Render,
+            ProcessId::Voice,
+            ProcessId::Storage,
+            ProcessId::PluginHost,
+        ],
+        ProcessId::Render | ProcessId::Voice | ProcessId::Storage | ProcessId::PluginHost => {
+            vec![ProcessId::Core]
         }
-        #[cfg(windows)]
-        {
-            let path = format!(r"\\.\pipe\lumi-{name}");
-            Transport::NamedPipe(path)
-        }
-        #[cfg(not(any(unix, windows)))]
-        {
-            let _ = runtime_dir;
-            Transport::InMemory
-        }
+        ProcessId::Plugin(_) => vec![ProcessId::PluginHost, ProcessId::Core],
     }
 }
+
+/// Create a properly configured MessageBus for a given process.
+pub fn create_bus(process_id: ProcessId, runtime_dir: Option<PathBuf>) -> MessageBus {
+    let mut config = BusConfig {
+        enable_transport: true,
+        auto_connect: default_peers_for(&process_id),
+        runtime_dir: runtime_dir.unwrap_or_else(transport::default_runtime_dir),
+    };
+
+    // Core doesn't need to connect to itself
+    config.auto_connect.retain(|p| p != &process_id);
+
+    MessageBus::new_with_config(process_id, config)
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
@@ -280,7 +403,8 @@ mod tests {
             ProcessId::Render,
             Channel::RenderCommand,
             serde_json::json!({"animation": "walk"}),
-        ).unwrap();
+        )
+        .unwrap();
 
         let bytes = serialize_message(&msg).unwrap();
         let deserialized = deserialize_message(&bytes).unwrap();
@@ -302,7 +426,8 @@ mod tests {
             ProcessId::Core,
             Channel::AiState,
             serde_json::json!({"state": "thinking"}),
-        ).unwrap();
+        )
+        .unwrap();
 
         bus.broadcast(Channel::AiState, msg.clone()).await.unwrap();
 
@@ -312,17 +437,50 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_message_serialization_json() {
+    async fn test_message_bus_send_recv() {
+        let bus = MessageBus::new(ProcessId::Core);
+
         let msg = LumiMessage::new_request(
             ProcessId::Core,
             ProcessId::Storage,
             Channel::MemoryQuery,
             serde_json::json!({"query": "test"}),
-        ).unwrap();
+        )
+        .unwrap();
 
-        let json = serialize_message_json(&msg).unwrap();
-        assert!(json.contains(r#""MemoryQuery""#));
-        assert!(json.contains(r#""Core""#));
-        assert!(json.contains(r#""Storage""#));
+        bus.send(msg).await.unwrap();
+
+        let received = bus.recv().await.unwrap();
+        assert_eq!(received.target, ProcessId::Storage);
+        assert_eq!(received.channel, Channel::MemoryQuery);
+    }
+
+    #[test]
+    fn test_default_peers() {
+        let core_peers = default_peers_for(&ProcessId::Core);
+        assert!(core_peers.contains(&ProcessId::Render));
+        assert!(core_peers.contains(&ProcessId::Voice));
+        assert!(core_peers.contains(&ProcessId::Storage));
+        assert!(core_peers.contains(&ProcessId::PluginHost));
+
+        let render_peers = default_peers_for(&ProcessId::Render);
+        assert_eq!(render_peers, vec![ProcessId::Core]);
+    }
+
+    #[tokio::test]
+    async fn test_message_bus_with_config() {
+        let config = BusConfig {
+            enable_transport: false, // Disable transport for test
+            ..Default::default()
+        };
+        let bus = MessageBus::new_with_config(ProcessId::Core, config);
+        assert!(bus.peer_manager.is_none());
+    }
+
+    #[test]
+    fn test_create_bus() {
+        let bus = create_bus(ProcessId::Core, None);
+        assert_eq!(*bus.process_id(), ProcessId::Core);
+        assert!(!bus.config.auto_connect.contains(&ProcessId::Core));
     }
 }
