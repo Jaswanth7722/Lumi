@@ -1,0 +1,44 @@
+# Rust build artifacts
+target/
+Cargo.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# OS files
+.DS_Store
+Thumbs.db
+*.dll
+
+# Python-generated files (from prototype/development)
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv
+.python-version
+*.pyc
+pyproject.toml
+main.py
+
+# Logs and debug
+*.log
+debug/
+
+# Local configuration
+lumi-config.toml
+local/
