@@ -210,9 +210,9 @@ mod tests {
 
     #[test]
     fn test_privacy_tier_ordering() {
-        assert!(PrivacyTier::Low as u8 < PrivacyTier::Medium as u8);
-        assert!(PrivacyTier::Medium as u8 < PrivacyTier::High as u8);
-        assert!(PrivacyTier::High as u8 < PrivacyTier::VeryHigh as u8);
+        assert!((PrivacyTier::Low as u8) < PrivacyTier::Medium as u8);
+        assert!((PrivacyTier::Medium as u8) < PrivacyTier::High as u8);
+        assert!((PrivacyTier::High as u8) < PrivacyTier::VeryHigh as u8);
     }
 
     #[test]

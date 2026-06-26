@@ -28,11 +28,11 @@ pub enum PrivacyTier {
 impl PrivacyTier {
     pub fn description(&self) -> &'static str {
         match self {
-            PrivacyTier::System => "Always observed, cannot disable",
+            PrivacyTier::System => "always observed, cannot disable",
             PrivacyTier::Low => "Observed but ephemeral, can disable",
             PrivacyTier::Medium => "Off by default, opt-in per feature",
             PrivacyTier::High => "Explicit request only, always requires approval",
-            PrivacyTier::Sensitive => "Never stored, not configurable",
+            PrivacyTier::Sensitive => "never stored, not configurable",
         }
     }
 }
@@ -113,7 +113,10 @@ impl PIIDetector {
                 PIICategory::Email => lower.contains('@') && lower.contains('.'),
                 PIICategory::CreditCard => content.chars().filter(|c| c.is_ascii_digit()).count() >= 13,
                 PIICategory::APIKey => {
-                    content.len() >= 20 && content.contains(|c: char| !c.is_alphanumeric())
+                    let alphanumeric = content.chars().filter(|c| c.is_alphanumeric()).count();
+                    content.len() >= 20
+                        && content.contains(|c: char| !c.is_alphanumeric() && !c.is_whitespace())
+                        && alphanumeric > 0
                 }
                 _ => false,
             };

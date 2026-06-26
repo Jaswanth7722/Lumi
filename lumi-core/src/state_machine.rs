@@ -164,8 +164,7 @@ mod tests {
     fn test_startup_transition() {
         let mut sm = StateMachine::new(default_transition_rules());
         sm.handle_event(StateEvent::StartupComplete);
-        // Trigger matching is simplified for skeleton
-        assert_eq!(*sm.current_state(), LumiState::Initializing);
+        assert_eq!(*sm.current_state(), LumiState::Greeting { phase: GreetingPhase::Starting });
     }
 
     #[test]

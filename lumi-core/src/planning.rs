@@ -84,11 +84,12 @@ impl PlanningEngine {
     }
 
     /// Build the execution graph for a plan.
-    pub fn build_execution_graph(&mut self, plan: &mut Plan) {
+    pub fn build_execution_graph(&mut self, plan_id: &str) {
+        let plan = self.active_plans.get_mut(plan_id).expect("plan not found");
         let graph = ExecutionGraph::build(plan.steps.clone());
-        self.current_graph = Some(graph);
         plan.status = PlanStatus::Running;
-        debug!("Execution graph built for plan {}", plan.id);
+        self.current_graph = Some(graph);
+        debug!("Execution graph built for plan {}", plan_id);
     }
 
     /// Get the next set of ready-to-execute steps.
@@ -249,8 +250,9 @@ mod tests {
             make_step("step-1", vec![]),
             make_step("step-2", vec!["step-1"]),
         ];
-        let mut plan = engine.create_plan("Test", "", steps, false);
-        engine.build_execution_graph(&mut plan);
+        let plan = engine.create_plan("Test", "", steps, false);
+        let plan_id = plan.id.clone();
+        engine.build_execution_graph(&plan_id);
         let ready = engine.ready_steps();
         assert_eq!(ready, vec!["step-1"]);
     }
@@ -284,8 +286,7 @@ mod tests {
 
         let plan_id = plan.id.clone();
 
-        let mut plan = engine.active_plans.get_mut(&plan_id).unwrap();
-        engine.build_execution_graph(&mut plan);
+        engine.build_execution_graph(&plan_id);
 
         let result = engine.execute_step(&plan_id, "step-1").await;
         assert!(result.is_ok());

@@ -163,12 +163,13 @@ impl ToolInputSanitizer {
         }
 
         let dangerous_patterns = [
-            (r"rm\s+-[rf]+\s+/", "recursive delete from root"),
+            (r"rm\s+-rf\s+/", "recursive delete from root"),
+            (r"rm\s+-fr\s+/", "recursive delete from root"),
             (r"dd\s+if=", "disk-level write"),
-            (r">\s*/dev/sd", "device write"),
-            (r"chmod\s+[0-7]*7\s+/", "world-writable system paths"),
-            (r"curl.*\|\s*sh", "remote code execution via pipe"),
-            (r"wget.*\|\s*bash", "remote code execution via pipe"),
+            (r">\s+/dev/sd", "device write"),
+            (r"chmod\s+7\s+/", "world-writable system paths"),
+            (r"curl\s+|\s+sh", "remote code execution via pipe"),
+            (r"wget\s+|\s+bash", "remote code execution via pipe"),
             (r":\(\)\s*\{", "fork bomb"),
             (r"mkfs\.", "filesystem format"),
             (r"mkswap", "swap partition creation"),

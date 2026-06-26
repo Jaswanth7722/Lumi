@@ -10,6 +10,7 @@ pub struct RingBuffer {
     buffer: Vec<f32>,
     capacity: usize,
     write_pos: usize,
+    total_written: usize,
 }
 
 impl RingBuffer {
@@ -18,6 +19,7 @@ impl RingBuffer {
             buffer: vec![0.0; capacity],
             capacity,
             write_pos: 0,
+            total_written: 0,
         }
     }
 
@@ -27,6 +29,7 @@ impl RingBuffer {
             self.buffer[self.write_pos] = sample;
             self.write_pos = (self.write_pos + 1) % self.capacity;
         }
+        self.total_written += samples.len();
     }
 
     /// Get the full buffer as a slice.
@@ -36,14 +39,14 @@ impl RingBuffer {
 
     /// Check if the buffer has been filled at least once.
     pub fn full(&self) -> bool {
-        // After one full cycle, the buffer is considered "full"
-        self.write_pos % self.capacity == 0 || self.buffer[self.capacity - 1] != 0.0
+        self.total_written >= self.capacity
     }
 
     /// Reset the buffer.
     pub fn reset(&mut self) {
         self.buffer.fill(0.0);
         self.write_pos = 0;
+        self.total_written = 0;
     }
 }
 

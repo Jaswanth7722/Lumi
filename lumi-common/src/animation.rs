@@ -143,7 +143,7 @@ pub struct PoseContribution {
 // ---------------------------------------------------------------------------
 
 /// Ear position target for the procedural ear controller.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct EarPose {
     /// -1.0 (back) to 1.0 (forward).
     pub forward_back: f32,

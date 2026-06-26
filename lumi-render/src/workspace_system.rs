@@ -215,11 +215,11 @@ mod tests {
         let id = ws.show_panel(PanelType::Memory);
 
         ws.pin_panel(&id);
-        let panel = ws.active_panels().iter().find(|p| p.panel_id == id).unwrap();
+        let panel = ws.active_panels().into_iter().find(|p| p.panel_id == id).unwrap();
         assert_eq!(panel.state, PanelState::Pinned);
 
         ws.unpin_panel(&id);
-        let panel = ws.active_panels().iter().find(|p| p.panel_id == id).unwrap();
+        let panel = ws.active_panels().into_iter().find(|p| p.panel_id == id).unwrap();
         assert_eq!(panel.state, PanelState::Visible);
     }
 

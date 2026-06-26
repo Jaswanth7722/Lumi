@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 // ---------------------------------------------------------------------------
 
 /// Result of processing an audio chunk through the wake word engine.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum WakeWordResult {
     /// Wake word detected with confidence score.
     Detected { confidence: f32 },

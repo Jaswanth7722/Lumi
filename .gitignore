@@ -42,3 +42,9 @@ debug/
 # Local configuration
 lumi-config.toml
 local/
+
+
+#uv
+uv.lock
+
+REPORT.md

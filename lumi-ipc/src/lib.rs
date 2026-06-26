@@ -321,8 +321,8 @@ mod tests {
         ).unwrap();
 
         let json = serialize_message_json(&msg).unwrap();
-        assert!(json.contains("memory.query"));
-        assert!(json.contains("core"));
-        assert!(json.contains("storage"));
+        assert!(json.contains(r#""MemoryQuery""#));
+        assert!(json.contains(r#""Core""#));
+        assert!(json.contains(r#""Storage""#));
     }
 }

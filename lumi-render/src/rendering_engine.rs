@@ -127,18 +127,20 @@ mod tests {
         assert!(engine.adapter_info().is_some());
     }
 
-    #[test]
-    fn test_frame_counting() {
+    #[tokio::test]
+    async fn test_frame_counting() {
         let mut engine = RenderingEngine::new();
+        engine.initialize().await.unwrap();
         engine.begin_frame();
         engine.begin_frame();
         engine.begin_frame();
         assert_eq!(engine.frame_count(), 3);
     }
 
-    #[test]
-    fn test_fps_calculation() {
+    #[tokio::test]
+    async fn test_fps_calculation() {
         let mut engine = RenderingEngine::new();
+        engine.initialize().await.unwrap();
         for _ in 0..60 {
             engine.begin_frame();
         }
