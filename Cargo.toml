@@ -8,6 +8,7 @@ members = [
     "lumi-voice",
     "lumi-storage",
     "lumi-plugin-host",
+    "lumi-sdk",
 ]
 
 [workspace.package]

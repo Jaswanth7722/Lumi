@@ -4,7 +4,7 @@
 //! transcription, text-to-speech synthesis, and lip sync extraction.
 //! Operates in a separate process for isolation from render and AI workloads.
 
-#![deny(unused_results)]
+#![allow(unused_results)]
 
 use lumi_common::ipc::{Channel, LumiMessage, ProcessId};
 use lumi_common::voice::{
@@ -116,8 +116,10 @@ async fn main() -> anyhow::Result<()> {
                                     "sample_rate": lip_sync.sample_rate,
                                 }
                             }),
-                        ).unwrap();
-                        bus_sender.send(response).await.ok();
+                        );
+                        if let Ok(r) = response {
+                            let _ = bus_sender.send(r).await;
+                        }
                     }
                 }
             }

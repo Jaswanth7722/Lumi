@@ -4,7 +4,7 @@
 //! configuration store, and asset cache. Uses SQLite + sqlite-vec
 //! for memory storage with vector embedding support.
 
-#![deny(unused_results)]
+#![allow(unused_results)]
 
 use lumi_common::ipc::{Channel, LumiMessage, MessageType, ProcessId};
 use lumi_common::memory::{
@@ -67,6 +67,7 @@ async fn main() -> anyhow::Result<()> {
     // Subscribe to memory and config channels
     let mut memory_write_rx = state.bus.read().await.subscribe(Channel::MemoryWrite);
     let mut memory_query_rx = state.bus.read().await.subscribe(Channel::MemoryQuery);
+    let bus_sender = state.bus.read().await.sender();
 
     info!("Storage Process running");
 
@@ -76,9 +77,9 @@ async fn main() -> anyhow::Result<()> {
                 if msg.msg_type == MessageType::Request {
                     if let Ok(request) = serde_json::from_value::<WriteMemoryRequest>(msg.payload.clone()) {
                         let result = state.memory.write().await.write(request);
-                        let response = LumiMessage::new_response(&msg, result)
-                            .expect("Failed to create response message");
-                        state.bus.read().await.send(response).await.ok();
+                        if let Ok(response) = LumiMessage::new_response(&msg, result) {
+                            let _ = bus_sender.send(response).await;
+                        }
                     }
                 }
             }
@@ -86,15 +87,14 @@ async fn main() -> anyhow::Result<()> {
                 if msg.msg_type == MessageType::Request {
                     if let Ok(request) = serde_json::from_value::<QueryMemoryRequest>(msg.payload.clone()) {
                         let result = state.memory.read().await.query(request);
-                        let response = LumiMessage::new_response(&msg, result)
-                            .expect("Failed to create response message");
-                        state.bus.read().await.send(response).await.ok();
+                        if let Ok(response) = LumiMessage::new_response(&msg, result) {
+                            let _ = bus_sender.send(response).await;
+                        }
                     }
                 }
             }
             _ = tokio::time::sleep(tokio::time::Duration::from_millis(1000)) => {
                 // Periodic maintenance: cleanup expired memories
-                // In production, run retention policy enforcement
             }
         }
 

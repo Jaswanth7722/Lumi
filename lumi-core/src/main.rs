@@ -23,6 +23,13 @@ mod memory;
 mod desktop_awareness;
 mod emotion;
 mod state_machine;
+mod input_system;
+mod security;
+mod privacy;
+mod performance;
+mod logging;
+mod update;
+mod audio;
 
 use ai_core::AICore;
 use conversation::ConversationSystem;

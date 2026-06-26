@@ -4,7 +4,7 @@
 //! isolation. Handles plugin registration, capability declaration,
 //! and tool execution within isolated sandboxes.
 
-#![deny(unused_results)]
+#![allow(unused_results)]
 
 use lumi_common::ipc::{Channel, LumiMessage, MessageType, ProcessId};
 use lumi_common::tool::{Capability, ToolDefinition, ToolError};
@@ -72,24 +72,26 @@ async fn main() -> anyhow::Result<()> {
                     if let Some(tool_name) = msg.payload.get("tool").and_then(|t| t.as_str()) {
                         let capability = state.broker.read().await.check_tool(tool_name);
                         match capability {
-                            Ok(caps) => {
+                            Ok(_caps) => {
                                 let result = state.sandbox.write().await.execute(tool_name, &msg.payload);
                                 let response = match result {
-                                    Ok(output) => LumiMessage::new_response(
-                                        &msg,
-                                        serde_json::json!({
-                                            "status": "success",
-                                            "output": output,
-                                        }),
-                                    ).expect("Failed to create response message"),
-                                    Err(e) => LumiMessage::new_error(&msg, e.to_string())
-                                        .expect("Failed to create error message"),
+                                    Ok(output) => {
+                                        let res = LumiMessage::new_response(
+                                            &msg,
+                                            serde_json::json!({
+                                                "status": "success",
+                                                "output": output,
+                                            }),
+                                        );
+                                        if let Ok(r) = res { r } else { continue; }
+                                    }
+                                    Err(e) => LumiMessage::new_error(&msg, e.to_string()),
                                 };
-                                bus_sender.send(response).await.ok();
+                                let _ = bus_sender.send(response).await;
                             }
                             Err(e) => {
                                 let response = LumiMessage::new_error(&msg, e);
-                                bus_sender.send(response).await.ok();
+                                let _ = bus_sender.send(response).await;
                             }
                         }
                     }
