@@ -4,6 +4,7 @@
 //! and built-in tool registry.
 
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 // ---------------------------------------------------------------------------
 // Tool Definition
@@ -48,8 +49,23 @@ pub enum ToolCategory {
     Plugin,
 }
 
+impl fmt::Display for ToolCategory {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ToolCategory::Filesystem => write!(f, "filesystem"),
+            ToolCategory::Terminal => write!(f, "terminal"),
+            ToolCategory::Web => write!(f, "web"),
+            ToolCategory::Application => write!(f, "application"),
+            ToolCategory::System => write!(f, "system"),
+            ToolCategory::Memory => write!(f, "memory"),
+            ToolCategory::Communication => write!(f, "communication"),
+            ToolCategory::Plugin => write!(f, "plugin"),
+        }
+    }
+}
+
 /// Capability required for tool execution.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Capability {
     #[serde(rename = "filesystem.read")]
     FilesystemRead,

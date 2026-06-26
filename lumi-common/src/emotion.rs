@@ -28,7 +28,7 @@ pub struct EmotionState {
 }
 
 /// Emotional states Lumi can express, mapped to genuine AI processing states.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Emotion {
     /// Default resting state.
     Neutral,

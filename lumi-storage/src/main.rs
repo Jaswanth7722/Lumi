@@ -76,7 +76,8 @@ async fn main() -> anyhow::Result<()> {
                 if msg.msg_type == MessageType::Request {
                     if let Ok(request) = serde_json::from_value::<WriteMemoryRequest>(msg.payload.clone()) {
                         let result = state.memory.write().await.write(request);
-                        let response = LumiMessage::new_response(&msg, result).unwrap();
+                        let response = LumiMessage::new_response(&msg, result)
+                            .expect("Failed to create response message");
                         state.bus.read().await.send(response).await.ok();
                     }
                 }
@@ -85,7 +86,8 @@ async fn main() -> anyhow::Result<()> {
                 if msg.msg_type == MessageType::Request {
                     if let Ok(request) = serde_json::from_value::<QueryMemoryRequest>(msg.payload.clone()) {
                         let result = state.memory.read().await.query(request);
-                        let response = LumiMessage::new_response(&msg, result).unwrap();
+                        let response = LumiMessage::new_response(&msg, result)
+                            .expect("Failed to create response message");
                         state.bus.read().await.send(response).await.ok();
                     }
                 }

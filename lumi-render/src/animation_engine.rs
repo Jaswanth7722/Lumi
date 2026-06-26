@@ -132,7 +132,7 @@ impl AnimationEngine {
     }
 
     /// Set the cursor look-at target position.
-    pub fn set_cursor_position(&mut self, screen_x: f32, screen_y: f32) {
+    pub fn set_cursor_position(&mut self, _screen_x: f32, _screen_y: f32) {
         // In production, this drives IK for head and eyes
     }
 

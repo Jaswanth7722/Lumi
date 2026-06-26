@@ -60,7 +60,7 @@ pub struct UserActivity {
 }
 
 /// Type of the last user input.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum InputType {
     Keyboard,
     Mouse,

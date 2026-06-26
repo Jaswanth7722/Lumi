@@ -165,7 +165,7 @@ impl WorkspaceSystem {
     pub fn create_plan_content(title: &str, steps: &[(&str, PanelStatus)]) -> PanelContent {
         let sections: Vec<PanelSection> = steps
             .iter()
-            .map(|(name, status)| PanelSection {
+            .map(|(name, _status)| PanelSection {
                 heading: Some(name.to_string()),
                 body: String::new(),
                 content_type: SectionContentType::StepList,

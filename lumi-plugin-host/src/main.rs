@@ -81,8 +81,9 @@ async fn main() -> anyhow::Result<()> {
                                             "status": "success",
                                             "output": output,
                                         }),
-                                    ).unwrap(),
-                                    Err(e) => LumiMessage::new_error(&msg, e.to_string()),
+                                    ).expect("Failed to create response message"),
+                                    Err(e) => LumiMessage::new_error(&msg, e.to_string())
+                                        .expect("Failed to create error message"),
                                 };
                                 bus_sender.send(response).await.ok();
                             }

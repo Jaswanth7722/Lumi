@@ -59,8 +59,9 @@ impl MemorySystem {
             }
         }
 
+        let mem_type = format!("{:?}", request.entry.memory_type).to_lowercase();
         self.memories.insert(id.clone(), request.entry);
-        debug!("Memory stored: {} (type: {:?})", id, request.entry.memory_type);
+        debug!("Memory stored: {} (type: {})", id, mem_type);
         WriteMemoryResult {
             id,
             stored: true,
