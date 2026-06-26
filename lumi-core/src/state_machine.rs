@@ -5,9 +5,9 @@
 //! consumed by downstream systems.
 
 use lumi_common::state_machine::{
-    LumiState, StateAction, StateCommand, StateEvent, StatePattern, TransitionRule, Trigger,
-    IdleSubState, GreetingPhase, InputSource, PlanningPhase, ResponseType,
-    RecoveryHint, CharacterState,
+    CharacterState, GreetingPhase, IdleSubState, InputSource, LumiState, PlanningPhase,
+    RecoveryHint, ResponseType, StateAction, StateCommand, StateEvent, StatePattern,
+    TransitionRule, Trigger,
 };
 use std::collections::VecDeque;
 use std::time::Instant;
@@ -53,7 +53,10 @@ impl StateMachine {
                 return;
             }
         }
-        debug!("Unhandled event {:?} in state {:?}", event, self.current_state);
+        debug!(
+            "Unhandled event {:?} in state {:?}",
+            event, self.current_state
+        );
     }
 
     fn transition_to(&mut self, new_state: LumiState, actions: &[StateAction]) {
@@ -95,16 +98,12 @@ impl StateMachine {
             StatePattern::Exact(_target) => true,
             StatePattern::Any => true,
             StatePattern::IdleAny => matches!(state, LumiState::Idle(_)),
-            StatePattern::AnyOf(states) => {
-                states.iter().any(|s| {
-                    std::mem::discriminant(s) == std::mem::discriminant(state)
-                })
-            }
-            StatePattern::Not(states) => {
-                !states.iter().any(|s| {
-                    std::mem::discriminant(s) == std::mem::discriminant(state)
-                })
-            }
+            StatePattern::AnyOf(states) => states
+                .iter()
+                .any(|s| std::mem::discriminant(s) == std::mem::discriminant(state)),
+            StatePattern::Not(states) => !states
+                .iter()
+                .any(|s| std::mem::discriminant(s) == std::mem::discriminant(state)),
         }
     }
 
@@ -164,7 +163,12 @@ mod tests {
     fn test_startup_transition() {
         let mut sm = StateMachine::new(default_transition_rules());
         sm.handle_event(StateEvent::StartupComplete);
-        assert_eq!(*sm.current_state(), LumiState::Greeting { phase: GreetingPhase::Starting });
+        assert_eq!(
+            *sm.current_state(),
+            LumiState::Greeting {
+                phase: GreetingPhase::Starting
+            }
+        );
     }
 
     #[test]

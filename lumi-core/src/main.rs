@@ -5,15 +5,15 @@
 //! the emotion system, state machine, input system, security, privacy,
 //! performance monitoring, logging, updates, and audio output.
 
-use lumi_common::ipc::{Channel, LumiMessage, MessageType, ProcessId};
 use lumi_common::ai::{AIState, AIStateEvent};
 use lumi_common::character::CrystalState;
 use lumi_common::emotion::{EmotionState, SentimentSignal, emotion_mapping_for_ai_state};
-use lumi_common::state_machine::{default_transition_rules, StateEvent, StateCommand};
-use lumi_common::input::{InputEvent, InputEventType, HotkeyAction, MouseButton};
+use lumi_common::input::{HotkeyAction, InputEvent, InputEventType, MouseButton};
+use lumi_common::ipc::{Channel, LumiMessage, MessageType, ProcessId};
 use lumi_common::logging::{AuditEntry, AuditEventType, AuditOutcome, LogLevel};
-use lumi_common::privacy::PIIAction;
 use lumi_common::performance::FramePacerConfig;
+use lumi_common::privacy::PIIAction;
+use lumi_common::state_machine::{StateCommand, StateEvent, default_transition_rules};
 use lumi_ipc::MessageBus;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -24,38 +24,38 @@ use tracing::{debug, error, info, warn};
 // -- Module declarations for all subsystems --
 mod ai_core;
 mod conversation;
-mod planning;
-mod tool_framework;
-mod memory;
 mod desktop_awareness;
 mod emotion;
+mod memory;
+mod planning;
 mod state_machine;
+mod tool_framework;
 
 // Volume III subsystem modules
-mod input_system;
-mod security;
-mod privacy;
-mod performance;
-mod logging;
-mod update;
 mod audio;
+mod input_system;
+mod logging;
+mod performance;
+mod privacy;
+mod security;
+mod update;
 
 // -- Use declarations for all subsystems --
 use ai_core::AICore;
 use conversation::ConversationSystem;
-use planning::PlanningEngine;
-use tool_framework::ToolFramework;
-use memory::MemorySystem;
 use desktop_awareness::DesktopAwareness;
 use emotion::EmotionSystem;
+use memory::MemorySystem;
+use planning::PlanningEngine;
+use tool_framework::ToolFramework;
 
-use input_system::InputSystem;
-use security::SecurityManager;
-use privacy::PrivacyManager;
-use performance::{FramePacer, ResponseCache};
-use logging::LoggingManager;
-use update::UpdateSystem;
 use audio::AudioEngine;
+use input_system::InputSystem;
+use logging::LoggingManager;
+use performance::{FramePacer, ResponseCache};
+use privacy::PrivacyManager;
+use security::SecurityManager;
+use update::UpdateSystem;
 
 /// Shared application state for the core process.
 /// All subsystems are wrapped in Arc<RwLock<...>> for concurrent access
@@ -109,9 +109,9 @@ impl CoreState {
             memory: Arc::new(RwLock::new(MemorySystem::new())),
             desktop: Arc::new(RwLock::new(DesktopAwareness::new())),
             emotion: Arc::new(RwLock::new(EmotionSystem::new())),
-            state_machine: Arc::new(RwLock::new(
-                state_machine::StateMachine::new(default_transition_rules())
-            )),
+            state_machine: Arc::new(RwLock::new(state_machine::StateMachine::new(
+                default_transition_rules(),
+            ))),
 
             // Volume III subsystems
             input: Arc::new(RwLock::new(InputSystem::new())),
@@ -119,7 +119,7 @@ impl CoreState {
             privacy: Arc::new(RwLock::new(PrivacyManager::new())),
             frame_pacer: Arc::new(RwLock::new(FramePacer::new(FramePacerConfig::default()))),
             response_cache: Arc::new(RwLock::new(ResponseCache::new(
-                lumi_common::performance::ResponseCacheConfig::default()
+                lumi_common::performance::ResponseCacheConfig::default(),
             ))),
             logging: Arc::new(RwLock::new(LoggingManager::new("core"))),
             update: Arc::new(RwLock::new(UpdateSystem::new())),
@@ -150,12 +150,12 @@ async fn main() -> anyhow::Result<()> {
     let state = CoreState::new(bus);
 
     // Subscribe to all IPC channels the core process handles
-    let mut render_input_rx    = state.bus.subscribe(Channel::RenderInput);
-    let mut voice_input_rx     = state.bus.subscribe(Channel::VoiceInput);
-    let mut voice_output_rx    = state.bus.subscribe(Channel::VoiceOutput);
+    let mut render_input_rx = state.bus.subscribe(Channel::RenderInput);
+    let mut voice_input_rx = state.bus.subscribe(Channel::VoiceInput);
+    let mut voice_output_rx = state.bus.subscribe(Channel::VoiceOutput);
     let mut plugin_capability_rx = state.bus.subscribe(Channel::PluginCapability);
-    let mut ai_command_rx      = state.bus.subscribe(Channel::AiCommand);
-    let mut desktop_event_rx   = state.bus.subscribe(Channel::DesktopEvent);
+    let mut ai_command_rx = state.bus.subscribe(Channel::AiCommand);
+    let mut desktop_event_rx = state.bus.subscribe(Channel::DesktopEvent);
     let mut config_operation_rx = state.bus.subscribe(Channel::ConfigOperation);
 
     // Initialize all subsystems
@@ -246,7 +246,10 @@ impl CoreState {
         // Privacy is ready immediately
 
         info!("[7/9] Initializing Logging Manager...");
-        self.logging.write().await.log(LogLevel::Info, "core", "Logging initialized");
+        self.logging
+            .write()
+            .await
+            .log(LogLevel::Info, "core", "Logging initialized");
 
         info!("[8/9] Initializing Update System...");
         // Update checker starts in background
@@ -257,12 +260,17 @@ impl CoreState {
         info!("=== All core subsystems initialized ===");
 
         // Emit startup event to state machine
-        self.state_machine.write().await.handle_event(StateEvent::StartupComplete);
+        self.state_machine
+            .write()
+            .await
+            .handle_event(StateEvent::StartupComplete);
 
         // Log audit entry for startup
-        self.logging.write().await.audit(
-            AuditEntry::tool_executed("core.startup", AuditOutcome::Success, None),
-        );
+        self.logging.write().await.audit(AuditEntry::tool_executed(
+            "core.startup",
+            AuditOutcome::Success,
+            None,
+        ));
     }
 
     // -----------------------------------------------------------------
@@ -284,9 +292,12 @@ impl CoreState {
         let idle_seconds = self.desktop.read().await.idle_seconds();
         if idle_seconds > 0 && idle_seconds % 300 == 0 {
             // Every 5 minutes of idle, emit idle event
-            self.state_machine.write().await.handle_event(
-                StateEvent::UserIdle { seconds: idle_seconds }
-            );
+            self.state_machine
+                .write()
+                .await
+                .handle_event(StateEvent::UserIdle {
+                    seconds: idle_seconds,
+                });
         }
 
         // 4. Drain state machine commands and route them
@@ -320,7 +331,10 @@ impl CoreState {
             StateCommand::SetCrystalState(state) => {
                 debug!("Crystal state: {:?}", state);
                 // Update emotion system
-                self.emotion.write().await.update_from_ai_state(&AIState::Thinking);
+                self.emotion
+                    .write()
+                    .await
+                    .update_from_ai_state(&AIState::Thinking);
             }
             StateCommand::ShowWorkspacePanel(panel_type) => {
                 debug!("Show panel: {:?}", panel_type);
@@ -370,7 +384,11 @@ impl CoreState {
                 InputEventType::CharacterClick => {
                     let x = event.screen_position.map(|p| p.x as i32).unwrap_or(0);
                     let y = event.screen_position.map(|p| p.y as i32).unwrap_or(0);
-                    let state_event = self.input.write().await.handle_click(x, y, MouseButton::Left);
+                    let state_event =
+                        self.input
+                            .write()
+                            .await
+                            .handle_click(x, y, MouseButton::Left);
                     if let Some(se) = state_event {
                         self.state_machine.write().await.handle_event(se);
                     }
@@ -380,9 +398,12 @@ impl CoreState {
                     let y = event.screen_position.map(|p| p.y).unwrap_or(0.0);
                     if self.input.write().await.handle_drag_start(x, y) {
                         // Emit drag start event to state machine
-                        self.state_machine.write().await.handle_event(
-                            StateEvent::UserDrag { new_position: (x, y) }
-                        );
+                        self.state_machine
+                            .write()
+                            .await
+                            .handle_event(StateEvent::UserDrag {
+                                new_position: (x, y),
+                            });
                     }
                 }
                 InputEventType::CharacterDragEnd => {
@@ -403,11 +424,18 @@ impl CoreState {
                 }
                 InputEventType::TextSubmitted { ref text } => {
                     let state_event = self.input.read().await.handle_text_input(text);
-                    self.state_machine.write().await.handle_event(state_event.clone());
+                    self.state_machine
+                        .write()
+                        .await
+                        .handle_event(state_event.clone());
 
                     // Route to conversation system
                     if let StateEvent::UserInput { ref content, .. } = state_event {
-                        self.conversation.write().await.receive_message(content).await;
+                        self.conversation
+                            .write()
+                            .await
+                            .receive_message(content)
+                            .await;
                     }
                 }
                 InputEventType::Hotkey { ref keys } => {
@@ -428,17 +456,19 @@ impl CoreState {
     async fn handle_hotkey_action(&self, action: HotkeyAction) {
         match action {
             HotkeyAction::ToggleConversation => {
-                self.state_machine.write().await.handle_event(
-                    StateEvent::UserInput {
+                self.state_machine
+                    .write()
+                    .await
+                    .handle_event(StateEvent::UserInput {
                         source: lumi_common::state_machine::InputSource::Keyboard,
                         content: String::new(),
-                    },
-                );
+                    });
             }
             HotkeyAction::ToggleVoice => {
-                self.state_machine.write().await.handle_event(
-                    StateEvent::WakeWord { confidence: 1.0 },
-                );
+                self.state_machine
+                    .write()
+                    .await
+                    .handle_event(StateEvent::WakeWord { confidence: 1.0 });
             }
             HotkeyAction::ToggleVisibility => {
                 let msg = LumiMessage::new_event(
@@ -454,10 +484,16 @@ impl CoreState {
                 // Toggle focus mode via desktop awareness
                 let mut desktop = self.desktop.write().await;
                 if desktop.is_focus_mode() {
-                    self.state_machine.write().await.handle_event(StateEvent::FocusEnded);
+                    self.state_machine
+                        .write()
+                        .await
+                        .handle_event(StateEvent::FocusEnded);
                     self.audio.write().await.set_focus_mode(false);
                 } else {
-                    self.state_machine.write().await.handle_event(StateEvent::FocusDetected);
+                    self.state_machine
+                        .write()
+                        .await
+                        .handle_event(StateEvent::FocusDetected);
                     self.audio.write().await.set_focus_mode(true);
                 }
             }
@@ -482,44 +518,59 @@ impl CoreState {
         debug!("Voice input received");
 
         // Screen for PII before processing
-        let transcript = msg.payload.get("transcript").and_then(|t| t.as_str()).map(|s| s.to_string());
+        let transcript = msg
+            .payload
+            .get("transcript")
+            .and_then(|t| t.as_str())
+            .map(|s| s.to_string());
 
         if let Some(ref text) = transcript {
             // Privacy check — apply PII detection before processing
-            let processed_text = if let Some(action) = self.privacy.read().await.screen_content(text) {
-                match action {
-                    PIIAction::Block => {
-                        warn!("Voice input blocked by PII detector");
-                        return;
+            let processed_text =
+                if let Some(action) = self.privacy.read().await.screen_content(text) {
+                    match action {
+                        PIIAction::Block => {
+                            warn!("Voice input blocked by PII detector");
+                            return;
+                        }
+                        PIIAction::Redact { placeholder } => {
+                            debug!("Voice input contains PII, redacting");
+                            placeholder
+                        }
+                        PIIAction::Warn { message } => {
+                            warn!("Voice input may contain sensitive data: {}", message);
+                            text.clone()
+                        }
                     }
-                    PIIAction::Redact { placeholder } => {
-                        debug!("Voice input contains PII, redacting");
-                        placeholder
-                    }
-                    PIIAction::Warn { message } => {
-                        warn!("Voice input may contain sensitive data: {}", message);
-                        text.clone()
-                    }
-                }
-            } else {
-                text.clone()
-            };
+                } else {
+                    text.clone()
+                };
 
             // Route to conversation system
             let mut conv = self.conversation.write().await;
             conv.receive_message(&processed_text).await;
 
             // Emit speech end event — triggers AI processing
-            self.state_machine.write().await.handle_event(
-                StateEvent::SpeechEnd { transcript: processed_text },
-            );
+            self.state_machine
+                .write()
+                .await
+                .handle_event(StateEvent::SpeechEnd {
+                    transcript: processed_text,
+                });
 
-            self.logging.write().await.log(LogLevel::Info, "voice", "Voice input processed");
+            self.logging
+                .write()
+                .await
+                .log(LogLevel::Info, "voice", "Voice input processed");
         }
 
         // Handle wake word activation (separate from transcription)
         if let Some(confidence) = msg.payload.get("confidence").and_then(|c| c.as_f64()) {
-            let state_event = self.input.read().await.handle_voice_activation(confidence as f32);
+            let state_event = self
+                .input
+                .read()
+                .await
+                .handle_voice_activation(confidence as f32);
             self.state_machine.write().await.handle_event(state_event);
             debug!("Wake word detected (confidence: {:.2})", confidence);
         }
@@ -534,10 +585,18 @@ impl CoreState {
 
         // Log telemetry
         let mut props = HashMap::new();
-        if let Some(duration_ms) = msg.payload.get("lip_sync").and_then(|l| l.get("duration_ms")).and_then(|d| d.as_u64()) {
+        if let Some(duration_ms) = msg
+            .payload
+            .get("lip_sync")
+            .and_then(|l| l.get("duration_ms"))
+            .and_then(|d| d.as_u64())
+        {
             props.insert("duration_ms".into(), duration_ms.to_string());
         }
-        self.logging.write().await.record_telemetry("tts_playback", props);
+        self.logging
+            .write()
+            .await
+            .record_telemetry("tts_playback", props);
     }
 
     /// Handle capability registrations from plugins.
@@ -557,13 +616,11 @@ impl CoreState {
                 }
 
                 // Log audit entry
-                self.logging.write().await.audit(
-                    AuditEntry::tool_executed(
-                        "plugin.register",
-                        AuditOutcome::Success,
-                        Some(true),
-                    ),
-                );
+                self.logging.write().await.audit(AuditEntry::tool_executed(
+                    "plugin.register",
+                    AuditOutcome::Success,
+                    Some(true),
+                ));
             }
         }
     }
@@ -581,9 +638,10 @@ impl CoreState {
                             self.emotion.write().await.update_from_ai_state(&ai_state);
 
                             // Route to state machine
-                            self.state_machine.write().await.handle_event(
-                                StateEvent::AIStateChanged(ai_state),
-                            );
+                            self.state_machine
+                                .write()
+                                .await
+                                .handle_event(StateEvent::AIStateChanged(ai_state));
                         }
                     }
                 }
@@ -602,8 +660,12 @@ impl CoreState {
                 }
                 "cache_response" => {
                     if let Some(query) = msg.payload.get("query").and_then(|q| q.as_str()) {
-                        if let Some(response) = msg.payload.get("response").and_then(|r| r.as_str()) {
-                            self.response_cache.write().await.put(query, response.to_string());
+                        if let Some(response) = msg.payload.get("response").and_then(|r| r.as_str())
+                        {
+                            self.response_cache
+                                .write()
+                                .await
+                                .put(query, response.to_string());
                         }
                     }
                 }
@@ -621,28 +683,40 @@ impl CoreState {
         if let Some(event_type) = msg.payload.get("event").and_then(|e| e.as_str()) {
             match event_type {
                 "focus_detected" => {
-                    self.state_machine.write().await.handle_event(StateEvent::FocusDetected);
+                    self.state_machine
+                        .write()
+                        .await
+                        .handle_event(StateEvent::FocusDetected);
                     self.audio.write().await.set_focus_mode(true);
                     // Enter calm state during focus mode
-                    self.emotion.write().await.transition_to(
-                        lumi_common::emotion::Emotion::Calm, 0.3
-                    );
+                    self.emotion
+                        .write()
+                        .await
+                        .transition_to(lumi_common::emotion::Emotion::Calm, 0.3);
                 }
                 "focus_ended" => {
-                    self.state_machine.write().await.handle_event(StateEvent::FocusEnded);
+                    self.state_machine
+                        .write()
+                        .await
+                        .handle_event(StateEvent::FocusEnded);
                     self.audio.write().await.set_focus_mode(false);
                 }
                 "user_active" => {
-                    self.state_machine.write().await.handle_event(StateEvent::UserActive);
-                    self.desktop.write().await.register_input(
-                        lumi_common::desktop::InputType::Keyboard,
-                    );
+                    self.state_machine
+                        .write()
+                        .await
+                        .handle_event(StateEvent::UserActive);
+                    self.desktop
+                        .write()
+                        .await
+                        .register_input(lumi_common::desktop::InputType::Keyboard);
                 }
                 "user_idle" => {
                     if let Some(seconds) = msg.payload.get("seconds").and_then(|s| s.as_u64()) {
-                        self.state_machine.write().await.handle_event(
-                            StateEvent::UserIdle { seconds },
-                        );
+                        self.state_machine
+                            .write()
+                            .await
+                            .handle_event(StateEvent::UserIdle { seconds });
                     }
                 }
                 _ => {
@@ -665,7 +739,8 @@ impl CoreState {
                     let action = self.security.read().await.check_approval("config.read");
                     match action {
                         lumi_common::security::ApprovalAction::Deny => {
-                            let response = LumiMessage::new_error(&msg, "Access denied to sensitive config");
+                            let response =
+                                LumiMessage::new_error(&msg, "Access denied to sensitive config");
                             let _ = self.bus.send(response).await;
                             return;
                         }
@@ -705,7 +780,12 @@ mod tests {
         // Verify all subsystems are initialized
         assert!(state.running.load(Ordering::Relaxed));
         assert!(!state.state_machine.blocking_read().is_idle()); // Starts in Initializing
-        assert!(!state.privacy.blocking_read().is_feature_enabled("screen_capture"));
+        assert!(
+            !state
+                .privacy
+                .blocking_read()
+                .is_feature_enabled("screen_capture")
+        );
         assert_eq!(state.update.blocking_read().current_version(), "1.0.0");
         assert!((state.audio.blocking_read().master_volume() - 0.7).abs() < f32::EPSILON);
     }
@@ -724,7 +804,10 @@ mod tests {
         let state = CoreState::new(bus);
 
         // Verify input system can handle clicks
-        let click = state.input.blocking_write().handle_click(50, 50, MouseButton::Left);
+        let click = state
+            .input
+            .blocking_write()
+            .handle_click(50, 50, MouseButton::Left);
         assert!(click.is_some());
     }
 
@@ -733,7 +816,10 @@ mod tests {
         let bus = MessageBus::new(ProcessId::Core);
         let state = CoreState::new(bus);
 
-        let action = state.security.blocking_read().check_approval("fs.read_file");
+        let action = state
+            .security
+            .blocking_read()
+            .check_approval("fs.read_file");
         match action {
             lumi_common::security::ApprovalAction::AutoApprove => {}
             _ => panic!("Expected auto-approve for fs.read_file"),
@@ -745,7 +831,10 @@ mod tests {
         let bus = MessageBus::new(ProcessId::Core);
         let state = CoreState::new(bus);
 
-        state.response_cache.blocking_write().put("hello", "Hi there!".into());
+        state
+            .response_cache
+            .blocking_write()
+            .put("hello", "Hi there!".into());
         let cached = state.response_cache.blocking_read().get("hello");
         assert_eq!(cached, Some("Hi there!"));
     }
@@ -755,7 +844,17 @@ mod tests {
         let bus = MessageBus::new(ProcessId::Core);
         let state = CoreState::new(bus);
 
-        assert!(!state.privacy.blocking_read().is_feature_enabled("clipboard_access"));
-        assert!(state.privacy.blocking_read().is_feature_enabled("active_window_tracking"));
+        assert!(
+            !state
+                .privacy
+                .blocking_read()
+                .is_feature_enabled("clipboard_access")
+        );
+        assert!(
+            state
+                .privacy
+                .blocking_read()
+                .is_feature_enabled("active_window_tracking")
+        );
     }
 }

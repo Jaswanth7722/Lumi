@@ -125,7 +125,10 @@ pub enum ContrastLevel {
 
 impl Default for ContrastRequirement {
     fn default() -> Self {
-        Self { ratio: 4.5, level: ContrastLevel::AA }
+        Self {
+            ratio: 4.5,
+            level: ContrastLevel::AA,
+        }
     }
 }
 

@@ -12,20 +12,20 @@ use lumi_common::voice::{
     WhisperConfig, WhisperModelSize,
 };
 use lumi_ipc::MessageBus;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::sync::RwLock;
 use tracing::{debug, error, info, warn};
 
-mod wake_word;
+mod ssml_processor;
 mod stt_engine;
 mod tts_engine;
-mod ssml_processor;
+mod wake_word;
 
-use wake_word::WakeWordEngine;
+use ssml_processor::SSMLProcessor;
 use stt_engine::STTEngine;
 use tts_engine::TTSEngine;
-use ssml_processor::SSMLProcessor;
+use wake_word::WakeWordEngine;
 
 /// Shared application state for the voice process.
 pub struct VoiceState {
@@ -80,15 +80,19 @@ async fn main() -> anyhow::Result<()> {
 
     // Initialize subsystems
     info!("Voice Process initializing...");
-    info!("Wake word: '{}' (threshold: {})",
-        state.wake_word_config.primary_phrase,
-        state.wake_word_config.threshold);
-    info!("STT model: {:?} ({})",
+    info!(
+        "Wake word: '{}' (threshold: {})",
+        state.wake_word_config.primary_phrase, state.wake_word_config.threshold
+    );
+    info!(
+        "STT model: {:?} ({})",
         state.stt_config.model_size,
-        state.stt_config.model_size.size_mb());
-    info!("Voice: '{}' (rate: {})",
-        state.voice_config.voice_id,
-        state.voice_config.speaking_rate);
+        state.stt_config.model_size.size_mb()
+    );
+    info!(
+        "Voice: '{}' (rate: {})",
+        state.voice_config.voice_id, state.voice_config.speaking_rate
+    );
 
     info!("Voice Process running");
 

@@ -81,10 +81,16 @@ mod regex_lite {
 
     impl Regex {
         pub fn new(pattern: &str) -> Self {
-            Self { pattern: pattern.to_string() }
+            Self {
+                pattern: pattern.to_string(),
+            }
         }
 
-        pub fn replace_all<'t>(&self, text: &'t str, replacement: impl Into<Replacement>) -> String {
+        pub fn replace_all<'t>(
+            &self,
+            text: &'t str,
+            replacement: impl Into<Replacement>,
+        ) -> String {
             // Simple string replacement for common patterns
             let repl: Replacement = replacement.into();
             match self.pattern.as_str() {
@@ -94,7 +100,11 @@ mod regex_lite {
                     let mut i = 0;
                     let chars: Vec<char> = text.chars().collect();
                     while i < chars.len() {
-                        if i + 2 < chars.len() && chars[i] == '`' && chars[i+1] == '`' && chars[i+2] == '`' {
+                        if i + 2 < chars.len()
+                            && chars[i] == '`'
+                            && chars[i + 1] == '`'
+                            && chars[i + 2] == '`'
+                        {
                             if !in_code_block {
                                 // Start of code block
                                 result.push_str(repl.to_string().as_str());
@@ -102,7 +112,8 @@ mod regex_lite {
                                 i += 3;
                                 // Skip to end of code block
                                 while i + 2 < chars.len() {
-                                    if chars[i] == '`' && chars[i+1] == '`' && chars[i+2] == '`' {
+                                    if chars[i] == '`' && chars[i + 1] == '`' && chars[i + 2] == '`'
+                                    {
                                         in_code_block = false;
                                         i += 3;
                                         break;

@@ -4,11 +4,11 @@
 //! using hierarchical blend trees, procedural animations, and
 //! state-driven animation selection.
 
-use lumi_common::animation::{
-    AnimationClip, BlendCurve, BlendMode, ClipCategory, ClipId, CursorLookAtConfig,
-    EarPose, PoseContribution,
-};
 use lumi_common::ai::AIState;
+use lumi_common::animation::{
+    AnimationClip, BlendCurve, BlendMode, ClipCategory, ClipId, CursorLookAtConfig, EarPose,
+    PoseContribution,
+};
 use std::collections::HashMap;
 use tracing::debug;
 
@@ -44,7 +44,10 @@ impl AnimationEngine {
     pub fn initialize(&mut self) {
         self.register_default_clips();
         self.initialized = true;
-        debug!("Animation Engine initialized with {} clips", self.clip_library.len());
+        debug!(
+            "Animation Engine initialized with {} clips",
+            self.clip_library.len()
+        );
     }
 
     /// Register the default animation clips.
@@ -112,7 +115,10 @@ impl AnimationEngine {
         if self.clip_library.contains_key(&clip_id) {
             self.current_clip = Some(clip_id);
             self.current_time = 0.0;
-            debug!("Playing animation: {:?} with mode {:?}", self.current_clip, mode);
+            debug!(
+                "Playing animation: {:?} with mode {:?}",
+                self.current_clip, mode
+            );
         }
     }
 

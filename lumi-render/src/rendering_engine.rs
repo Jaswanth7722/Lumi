@@ -64,7 +64,7 @@ impl RenderingEngine {
     /// Execute a specific render pass.
     pub fn execute_pass(&self, _pass: RenderPass) {
         // In production, this would submit GPU work for each pipeline stage:
-        // DepthPrePass → GeometryPass → FurPass → TransparencyPass → 
+        // DepthPrePass → GeometryPass → FurPass → TransparencyPass →
         // LightingPass → PostProcessingPass → UICompositePass → FinalCompositePass
     }
 

@@ -15,7 +15,10 @@ pub enum PositionTarget {
     /// Move to an absolute screen position.
     Absolute { x: f32, y: f32 },
     /// Position relative to a specific window.
-    RelativeToWindow { window_id: String, anchor: WindowAnchor },
+    RelativeToWindow {
+        window_id: String,
+        anchor: WindowAnchor,
+    },
     /// Position near the cursor with an offset.
     NearCursor { offset_x: f32, offset_y: f32 },
     /// Position at a screen edge.
@@ -97,10 +100,10 @@ impl SpringInterpolator {
     /// Update the spring for the given time step.
     /// Returns the new position.
     pub fn update(&mut self, dt: f32) -> (f32, f32) {
-        let force_x = (self.target.0 - self.current.0) * self.stiffness
-            - self.velocity.0 * self.damping;
-        let force_y = (self.target.1 - self.current.1) * self.stiffness
-            - self.velocity.1 * self.damping;
+        let force_x =
+            (self.target.0 - self.current.0) * self.stiffness - self.velocity.0 * self.damping;
+        let force_y =
+            (self.target.1 - self.current.1) * self.stiffness - self.velocity.1 * self.damping;
 
         self.velocity.0 += force_x / self.mass * dt;
         self.velocity.1 += force_y / self.mass * dt;
@@ -116,8 +119,7 @@ impl SpringInterpolator {
         let dx = self.current.0 - self.target.0;
         let dy = self.current.1 - self.target.1;
         let dist_sq = dx * dx + dy * dy;
-        let speed_sq = self.velocity.0 * self.velocity.0
-            + self.velocity.1 * self.velocity.1;
+        let speed_sq = self.velocity.0 * self.velocity.0 + self.velocity.1 * self.velocity.1;
         dist_sq < epsilon && speed_sq < epsilon
     }
 }
@@ -193,9 +195,15 @@ mod tests {
     fn test_position_target_variants() {
         let targets = vec![
             PositionTarget::Absolute { x: 100.0, y: 200.0 },
-            PositionTarget::NearCursor { offset_x: 20.0, offset_y: 20.0 },
+            PositionTarget::NearCursor {
+                offset_x: 20.0,
+                offset_y: 20.0,
+            },
             PositionTarget::Preserve,
-            PositionTarget::ScreenEdge { edge: ScreenEdge::Bottom, position: 0.5 },
+            PositionTarget::ScreenEdge {
+                edge: ScreenEdge::Bottom,
+                position: 0.5,
+            },
         ];
         for target in targets {
             let json = serde_json::to_value(&target).unwrap();

@@ -4,8 +4,8 @@
 //! error recovery, and user approval workflows.
 
 use lumi_common::plan::{
-    ExecutionGraph, Plan, PlanContext, PlanResult, PlanStatus, PlanStep, RecoveryStrategy,
-    StepStatus, ToolResult, ExecutionError,
+    ExecutionError, ExecutionGraph, Plan, PlanContext, PlanResult, PlanStatus, PlanStep,
+    RecoveryStrategy, StepStatus, ToolResult,
 };
 use std::collections::HashMap;
 use tracing::{debug, info, warn};
@@ -76,8 +76,12 @@ impl PlanningEngine {
             approved_at: None,
         };
 
-        info!("Plan created: {} ({} steps, approval: {})",
-            plan.title, plan.steps.len(), plan.approval_required);
+        info!(
+            "Plan created: {} ({} steps, approval: {})",
+            plan.title,
+            plan.steps.len(),
+            plan.approval_required
+        );
 
         self.active_plans.insert(plan.id.clone(), plan.clone());
         plan
@@ -108,11 +112,19 @@ impl PlanningEngine {
     }
 
     /// Execute a single step.
-    pub async fn execute_step(&mut self, plan_id: &str, step_id: &str) -> Result<ToolResult, String> {
-        let plan = self.active_plans.get_mut(plan_id)
+    pub async fn execute_step(
+        &mut self,
+        plan_id: &str,
+        step_id: &str,
+    ) -> Result<ToolResult, String> {
+        let plan = self
+            .active_plans
+            .get_mut(plan_id)
             .ok_or_else(|| format!("Plan {plan_id} not found"))?;
 
-        let step = plan.steps.iter_mut()
+        let step = plan
+            .steps
+            .iter_mut()
             .find(|s| s.id == step_id)
             .ok_or_else(|| format!("Step {step_id} not found"))?;
 
@@ -158,7 +170,10 @@ impl PlanningEngine {
             }
         } else if error.contains("permission") || error.contains("denied") {
             RecoveryStrategy::AskUser {
-                message: format!("Lumi needs permission to {}. Please grant access.", step.description),
+                message: format!(
+                    "Lumi needs permission to {}. Please grant access.",
+                    step.description
+                ),
             }
         } else if error.contains("not found") || error.contains("missing") {
             RecoveryStrategy::AlternativeTool {

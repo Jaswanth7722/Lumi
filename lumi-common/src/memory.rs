@@ -156,40 +156,55 @@ impl Default for RetentionConfig {
     fn default() -> Self {
         let mut policies = HashMap::new();
 
-        policies.insert("preference".into(), RetentionPolicy {
-            expires_days: 365,
-            min_confidence: 0.7,
-            auto_verify: false,
-            require_user_confirmation: false,
-        });
+        policies.insert(
+            "preference".into(),
+            RetentionPolicy {
+                expires_days: 365,
+                min_confidence: 0.7,
+                auto_verify: false,
+                require_user_confirmation: false,
+            },
+        );
 
-        policies.insert("observation".into(), RetentionPolicy {
-            expires_days: 30,
-            min_confidence: 0.85,
-            auto_verify: false,
-            require_user_confirmation: true,
-        });
+        policies.insert(
+            "observation".into(),
+            RetentionPolicy {
+                expires_days: 30,
+                min_confidence: 0.85,
+                auto_verify: false,
+                require_user_confirmation: true,
+            },
+        );
 
-        policies.insert("fact".into(), RetentionPolicy {
-            expires_days: 730,
-            min_confidence: 0.8,
-            auto_verify: false,
-            require_user_confirmation: false,
-        });
+        policies.insert(
+            "fact".into(),
+            RetentionPolicy {
+                expires_days: 730,
+                min_confidence: 0.8,
+                auto_verify: false,
+                require_user_confirmation: false,
+            },
+        );
 
-        policies.insert("goal".into(), RetentionPolicy {
-            expires_days: 90,
-            min_confidence: 0.75,
-            auto_verify: false,
-            require_user_confirmation: false,
-        });
+        policies.insert(
+            "goal".into(),
+            RetentionPolicy {
+                expires_days: 90,
+                min_confidence: 0.75,
+                auto_verify: false,
+                require_user_confirmation: false,
+            },
+        );
 
-        policies.insert("project".into(), RetentionPolicy {
-            expires_days: 180,
-            min_confidence: 0.7,
-            auto_verify: false,
-            require_user_confirmation: false,
-        });
+        policies.insert(
+            "project".into(),
+            RetentionPolicy {
+                expires_days: 180,
+                min_confidence: 0.7,
+                auto_verify: false,
+                require_user_confirmation: false,
+            },
+        );
 
         Self { policies }
     }

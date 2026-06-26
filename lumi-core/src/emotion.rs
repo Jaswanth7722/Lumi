@@ -3,12 +3,12 @@
 //! Translates AI processing state, conversation sentiment, and task outcomes
 //! into emotional expression parameters for the character.
 
-use lumi_common::emotion::{
-    Emotion, EmotionMapping, EmotionState, EmotionTransitionConfig, SentimentSignal,
-    BodyPosture, default_emotion_configs, emotion_mapping_for_ai_state,
-};
 use lumi_common::ai::AIState;
 use lumi_common::character::CrystalColor;
+use lumi_common::emotion::{
+    BodyPosture, Emotion, EmotionMapping, EmotionState, EmotionTransitionConfig, SentimentSignal,
+    default_emotion_configs, emotion_mapping_for_ai_state,
+};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 use tracing::debug;
@@ -54,15 +54,15 @@ impl EmotionSystem {
 
     /// Transition to a new primary emotion with given intensity.
     pub fn transition_to(&mut self, emotion: Emotion, intensity: f32) {
-        let config = self
-            .transition_configs
-            .get(&emotion)
-            .cloned()
-            .unwrap_or(EmotionTransitionConfig {
-                fade_in_ms: 300,
-                fade_out_ms: 500,
-                min_hold_ms: 500,
-            });
+        let config =
+            self.transition_configs
+                .get(&emotion)
+                .cloned()
+                .unwrap_or(EmotionTransitionConfig {
+                    fade_in_ms: 300,
+                    fade_out_ms: 500,
+                    min_hold_ms: 500,
+                });
 
         // Check minimum hold time
         let elapsed = self.current_since.elapsed().as_millis() as u64;
@@ -86,17 +86,17 @@ impl EmotionSystem {
         };
         self.current_since = Instant::now();
 
-        debug!("Emotion transitioned to {:?} (intensity: {})", emotion, intensity);
+        debug!(
+            "Emotion transitioned to {:?} (intensity: {})",
+            emotion, intensity
+        );
     }
 
     /// Apply a sentiment signal from conversation analysis or task results.
     pub fn apply_signal(&mut self, signal: SentimentSignal) {
         match signal {
             SentimentSignal::UserPositive { strength } => {
-                self.transition_to(
-                    Emotion::Happy,
-                    strength.clamp(0.3, 1.0),
-                );
+                self.transition_to(Emotion::Happy, strength.clamp(0.3, 1.0));
             }
             SentimentSignal::UserNegative { strength: _ } => {
                 self.transition_to(Emotion::Concerned, 0.6);

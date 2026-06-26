@@ -19,10 +19,10 @@
 //! }
 //! ```
 
-pub mod prelude;
 pub mod plugin;
+pub mod prelude;
 pub mod tool;
 
+pub use lumi_common::plan::ToolResult;
 /// Re-export lumi_common types for plugin developers.
 pub use lumi_common::tool::{Capability, ToolDefinition, ToolError};
-pub use lumi_common::plan::ToolResult;

@@ -45,9 +45,15 @@ pub enum PanelState {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WorkspaceCommand {
     /// Show a panel with initial content.
-    Show { panel_type: PanelType, content: serde_json::Value },
+    Show {
+        panel_type: PanelType,
+        content: serde_json::Value,
+    },
     /// Update the content of an existing panel.
-    Update { panel_id: String, content: serde_json::Value },
+    Update {
+        panel_id: String,
+        content: serde_json::Value,
+    },
     /// Hide and dismiss a panel.
     Hide { panel_id: String },
     /// Pin a panel to prevent auto-dismiss.
@@ -133,7 +139,12 @@ pub struct Rect {
 
 impl Rect {
     pub fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
-        Self { x, y, width, height }
+        Self {
+            x,
+            y,
+            width,
+            height,
+        }
     }
 
     pub fn right(&self) -> f32 {
@@ -204,19 +215,64 @@ pub fn compute_panel_position(
 ) -> (f32, f32) {
     let candidates = match preferred_side {
         PreferredSide::Right => vec![
-            ((lumi_bounds.right() + 16.0, lumi_bounds.top()), PreferredSide::Right),
-            ((lumi_bounds.left() - panel_size.width - 16.0, lumi_bounds.top()), PreferredSide::Left),
-            ((lumi_bounds.center_x() - panel_size.width / 2.0, lumi_bounds.top() - panel_size.height - 16.0), PreferredSide::Above),
+            (
+                (lumi_bounds.right() + 16.0, lumi_bounds.top()),
+                PreferredSide::Right,
+            ),
+            (
+                (
+                    lumi_bounds.left() - panel_size.width - 16.0,
+                    lumi_bounds.top(),
+                ),
+                PreferredSide::Left,
+            ),
+            (
+                (
+                    lumi_bounds.center_x() - panel_size.width / 2.0,
+                    lumi_bounds.top() - panel_size.height - 16.0,
+                ),
+                PreferredSide::Above,
+            ),
         ],
         PreferredSide::Left => vec![
-            ((lumi_bounds.left() - panel_size.width - 16.0, lumi_bounds.top()), PreferredSide::Left),
-            ((lumi_bounds.right() + 16.0, lumi_bounds.top()), PreferredSide::Right),
-            ((lumi_bounds.center_x() - panel_size.width / 2.0, lumi_bounds.top() - panel_size.height - 16.0), PreferredSide::Above),
+            (
+                (
+                    lumi_bounds.left() - panel_size.width - 16.0,
+                    lumi_bounds.top(),
+                ),
+                PreferredSide::Left,
+            ),
+            (
+                (lumi_bounds.right() + 16.0, lumi_bounds.top()),
+                PreferredSide::Right,
+            ),
+            (
+                (
+                    lumi_bounds.center_x() - panel_size.width / 2.0,
+                    lumi_bounds.top() - panel_size.height - 16.0,
+                ),
+                PreferredSide::Above,
+            ),
         ],
         PreferredSide::Above => vec![
-            ((lumi_bounds.center_x() - panel_size.width / 2.0, lumi_bounds.top() - panel_size.height - 16.0), PreferredSide::Above),
-            ((lumi_bounds.right() + 16.0, lumi_bounds.top()), PreferredSide::Right),
-            ((lumi_bounds.left() - panel_size.width - 16.0, lumi_bounds.top()), PreferredSide::Left),
+            (
+                (
+                    lumi_bounds.center_x() - panel_size.width / 2.0,
+                    lumi_bounds.top() - panel_size.height - 16.0,
+                ),
+                PreferredSide::Above,
+            ),
+            (
+                (lumi_bounds.right() + 16.0, lumi_bounds.top()),
+                PreferredSide::Right,
+            ),
+            (
+                (
+                    lumi_bounds.left() - panel_size.width - 16.0,
+                    lumi_bounds.top(),
+                ),
+                PreferredSide::Left,
+            ),
         ],
     };
 
@@ -248,7 +304,10 @@ mod tests {
     #[test]
     fn test_panel_positioning_fallback() {
         let lumi = Rect::new(500.0, 500.0, 100.0, 150.0);
-        let panel_size = Size { width: 300.0, height: 200.0 };
+        let panel_size = Size {
+            width: 300.0,
+            height: 200.0,
+        };
         let monitor = MonitorInfo {
             work_area: Rect::new(0.0, 0.0, 1920.0, 1080.0),
             scale_factor: 1.0,
@@ -264,7 +323,10 @@ mod tests {
     #[test]
     fn test_panel_positioning_edge() {
         let lumi = Rect::new(1800.0, 500.0, 100.0, 150.0);
-        let panel_size = Size { width: 300.0, height: 200.0 };
+        let panel_size = Size {
+            width: 300.0,
+            height: 200.0,
+        };
         let monitor = MonitorInfo {
             work_area: Rect::new(0.0, 0.0, 1920.0, 1080.0),
             scale_factor: 1.0,

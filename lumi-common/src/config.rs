@@ -364,7 +364,9 @@ pub fn validate_config(config: &LumiConfig) -> ValidationResult {
     }
 
     // Desktop Awareness
-    if config.desktop_awareness.idle_sleep_minutes < 1 || config.desktop_awareness.idle_sleep_minutes > 120 {
+    if config.desktop_awareness.idle_sleep_minutes < 1
+        || config.desktop_awareness.idle_sleep_minutes > 120
+    {
         warnings.push(format!(
             "Idle sleep time {} minutes is outside recommended range (1-120)",
             config.desktop_awareness.idle_sleep_minutes
@@ -391,7 +393,8 @@ pub fn config_directory() -> String {
     }
     #[cfg(target_os = "windows")]
     {
-        let appdata = std::env::var("APPDATA").unwrap_or_else(|_| "C:\\Users\\Default\\AppData\\Roaming".into());
+        let appdata = std::env::var("APPDATA")
+            .unwrap_or_else(|_| "C:\\Users\\Default\\AppData\\Roaming".into());
         format!("{appdata}\\Lumi")
     }
     #[cfg(target_os = "linux")]
@@ -423,7 +426,12 @@ mod tests {
         config.character.size_scale = 3.0;
         let result = validate_config(&config);
         assert!(!result.valid);
-        assert!(result.errors.iter().any(|e| e.field == "character.size_scale"));
+        assert!(
+            result
+                .errors
+                .iter()
+                .any(|e| e.field == "character.size_scale")
+        );
     }
 
     #[test]

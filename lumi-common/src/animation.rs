@@ -3,10 +3,10 @@
 //! Defines the animation blend tree architecture, clip library categories,
 //! cursor look-at system, ear controller, and procedural animation types.
 
-use serde::{Deserialize, Serialize};
 use crate::ai::AIState;
 use crate::character::Viseme;
 use crate::emotion::Emotion;
+use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------
 // Animation Clip
@@ -116,8 +116,8 @@ impl Default for CursorLookAtConfig {
         Self {
             head_weight: 0.6,
             eye_weight: 0.9,
-            max_head_yaw: 0.4,    // ~23 degrees
-            max_head_pitch: 0.2,  // ~11 degrees
+            max_head_yaw: 0.4,   // ~23 degrees
+            max_head_pitch: 0.2, // ~11 degrees
             smoothing: 8.0,
         }
     }
@@ -153,23 +153,38 @@ pub struct EarPose {
 
 impl EarPose {
     pub fn neutral() -> Self {
-        Self { forward_back: 0.0, up_down: 0.0 }
+        Self {
+            forward_back: 0.0,
+            up_down: 0.0,
+        }
     }
 
     pub fn attentive() -> Self {
-        Self { forward_back: 1.0, up_down: 0.8 }
+        Self {
+            forward_back: 1.0,
+            up_down: 0.8,
+        }
     }
 
     pub fn thinking() -> Self {
-        Self { forward_back: 0.3, up_down: 0.5 }
+        Self {
+            forward_back: 0.3,
+            up_down: 0.5,
+        }
     }
 
     pub fn sad() -> Self {
-        Self { forward_back: -0.5, up_down: -0.3 }
+        Self {
+            forward_back: -0.5,
+            up_down: -0.3,
+        }
     }
 
     pub fn happy() -> Self {
-        Self { forward_back: 0.6, up_down: 1.0 }
+        Self {
+            forward_back: 0.6,
+            up_down: 1.0,
+        }
     }
 }
 
@@ -178,11 +193,20 @@ pub fn ear_pose_for_ai_state(state: &AIState) -> EarPose {
     match state {
         AIState::Listening | AIState::ReceivingInput => EarPose::attentive(),
         AIState::Thinking | AIState::RetrievingMemory => EarPose::thinking(),
-        AIState::Planning | AIState::ExecutingTool => EarPose { forward_back: 0.5, up_down: 0.6 },
-        AIState::Speaking => EarPose { forward_back: 0.3, up_down: 0.3 },
+        AIState::Planning | AIState::ExecutingTool => EarPose {
+            forward_back: 0.5,
+            up_down: 0.6,
+        },
+        AIState::Speaking => EarPose {
+            forward_back: 0.3,
+            up_down: 0.3,
+        },
         AIState::Error => EarPose::sad(),
         AIState::Success => EarPose::happy(),
-        AIState::AwaitingConfirmation => EarPose { forward_back: 0.7, up_down: 0.4 },
+        AIState::AwaitingConfirmation => EarPose {
+            forward_back: 0.7,
+            up_down: 0.4,
+        },
         _ => EarPose::neutral(),
     }
 }
@@ -211,8 +235,14 @@ mod tests {
 
     #[test]
     fn test_ear_pose_for_ai_state() {
-        assert_eq!(ear_pose_for_ai_state(&AIState::Listening), EarPose::attentive());
-        assert_eq!(ear_pose_for_ai_state(&AIState::Thinking), EarPose::thinking());
+        assert_eq!(
+            ear_pose_for_ai_state(&AIState::Listening),
+            EarPose::attentive()
+        );
+        assert_eq!(
+            ear_pose_for_ai_state(&AIState::Thinking),
+            EarPose::thinking()
+        );
         assert_eq!(ear_pose_for_ai_state(&AIState::Error), EarPose::sad());
         assert_eq!(ear_pose_for_ai_state(&AIState::Success), EarPose::happy());
         assert_eq!(ear_pose_for_ai_state(&AIState::Idle), EarPose::neutral());

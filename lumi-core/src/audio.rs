@@ -23,7 +23,10 @@ impl AudioEngine {
         if !self.config.sfx_enabled || self.focus_mode || self.muted {
             return;
         }
-        debug!("Playing SFX: {:?} (volume: {})", sound_id, self.config.sfx_volume);
+        debug!(
+            "Playing SFX: {:?} (volume: {})",
+            sound_id, self.config.sfx_volume
+        );
     }
 
     pub fn play_tts(&self) {

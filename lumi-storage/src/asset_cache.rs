@@ -44,7 +44,7 @@ impl AssetCache {
     pub fn new() -> Self {
         Self {
             entries: HashMap::new(),
-            max_size_bytes: 500 * 1024 * 1024, // 500 MB
+            max_size_bytes: 500 * 1024 * 1024,      // 500 MB
             default_ttl: Duration::from_secs(3600), // 1 hour
             hits: 0,
             misses: 0,

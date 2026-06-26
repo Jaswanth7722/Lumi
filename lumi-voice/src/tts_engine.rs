@@ -95,7 +95,10 @@ mod tests {
     async fn test_synthesis_estimates_duration() {
         let mut engine = TTSEngine::new();
         engine.load_model();
-        let result = engine.synthesize("Hello, how are you today?").await.unwrap();
+        let result = engine
+            .synthesize("Hello, how are you today?")
+            .await
+            .unwrap();
         assert!(result.duration_ms > 0);
         assert_eq!(result.num_channels, 1);
     }

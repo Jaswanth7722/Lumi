@@ -35,10 +35,7 @@ impl CharacterEngine {
             crystal_state: CrystalState::default(),
             material_overrides: Vec::new(),
             world_transform: [
-                1.0, 0.0, 0.0, 0.0,
-                0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0,
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
             ],
             shadow_caster: true,
         }

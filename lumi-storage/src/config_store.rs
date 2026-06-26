@@ -91,7 +91,10 @@ mod tests {
         let mut store = ConfigStore::new();
         store.set_defaults();
         assert_eq!(store.get("render.fps"), Some(&serde_json::json!(60)));
-        assert_eq!(store.get("voice.wake_word"), Some(&serde_json::json!("Hey Lumi")));
+        assert_eq!(
+            store.get("voice.wake_word"),
+            Some(&serde_json::json!("Hey Lumi"))
+        );
     }
 
     #[test]

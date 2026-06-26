@@ -217,10 +217,7 @@ impl LumiMessage {
     }
 
     /// Create a new error message.
-    pub fn new_error(
-        request: &LumiMessage,
-        error: impl ToString,
-    ) -> Self {
+    pub fn new_error(request: &LumiMessage, error: impl ToString) -> Self {
         Self {
             id: uuid::Uuid::new_v4().to_string(),
             version: 1,
@@ -261,7 +258,8 @@ mod tests {
             ProcessId::Render,
             Channel::RenderCommand,
             serde_json::json!({"animation": "walk"}),
-        ).unwrap();
+        )
+        .unwrap();
 
         assert_eq!(msg.source, ProcessId::Core);
         assert_eq!(msg.target, ProcessId::Render);
@@ -277,12 +275,10 @@ mod tests {
             ProcessId::Storage,
             Channel::MemoryQuery,
             serde_json::json!({"query": "user preferences"}),
-        ).unwrap();
+        )
+        .unwrap();
 
-        let res = LumiMessage::new_response(
-            &req,
-            serde_json::json!({"results": []}),
-        ).unwrap();
+        let res = LumiMessage::new_response(&req, serde_json::json!({"results": []})).unwrap();
 
         assert_eq!(res.source, ProcessId::Storage);
         assert_eq!(res.target, ProcessId::Core);

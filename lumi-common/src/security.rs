@@ -177,17 +177,23 @@ impl Default for ApprovalGate {
     fn default() -> Self {
         let rules = vec![
             ApprovalRule {
-                pattern: ToolPattern { pattern: "fs.delete".into() },
+                pattern: ToolPattern {
+                    pattern: "fs.delete".into(),
+                },
                 condition: ApprovalCondition::Always,
                 action: ApprovalAction::RequireUserConfirmation,
             },
             ApprovalRule {
-                pattern: ToolPattern { pattern: "terminal.execute".into() },
+                pattern: ToolPattern {
+                    pattern: "terminal.execute".into(),
+                },
                 condition: ApprovalCondition::Always,
                 action: ApprovalAction::RequireUserConfirmation,
             },
             ApprovalRule {
-                pattern: ToolPattern { pattern: "fs.read".into() },
+                pattern: ToolPattern {
+                    pattern: "fs.read".into(),
+                },
                 condition: ApprovalCondition::Always,
                 action: ApprovalAction::AutoApprove,
             },
@@ -276,7 +282,7 @@ mod tests {
     fn test_approval_gate_auto_approve() {
         let gate = ApprovalGate::default();
         match gate.evaluate("fs.read_file") {
-            ApprovalAction::AutoApprove => {},
+            ApprovalAction::AutoApprove => {}
             other => panic!("Expected auto-approve, got {:?}", other),
         }
     }
@@ -285,14 +291,16 @@ mod tests {
     fn test_approval_gate_require_confirm() {
         let gate = ApprovalGate::default();
         match gate.evaluate("fs.delete_file") {
-            ApprovalAction::RequireUserConfirmation => {},
+            ApprovalAction::RequireUserConfirmation => {}
             other => panic!("Expected confirmation, got {:?}", other),
         }
     }
 
     #[test]
     fn test_tool_pattern_matching() {
-        let pattern = ToolPattern { pattern: "fs.*".into() };
+        let pattern = ToolPattern {
+            pattern: "fs.*".into(),
+        };
         assert!(pattern.matches("fs.read_file"));
         assert!(pattern.matches("fs.delete"));
         assert!(!pattern.matches("terminal.execute"));
@@ -308,8 +316,14 @@ mod tests {
     fn test_process_capabilities() {
         let caps = default_process_capabilities();
         assert_eq!(caps.len(), 5);
-        assert!(caps.iter().any(|c| c.process_name == "render" && c.gpu_access));
-        assert!(caps.iter().any(|c| c.process_name == "plugin-host" && c.sandbox_type == SandboxType::Wasm));
+        assert!(
+            caps.iter()
+                .any(|c| c.process_name == "render" && c.gpu_access)
+        );
+        assert!(
+            caps.iter()
+                .any(|c| c.process_name == "plugin-host" && c.sandbox_type == SandboxType::Wasm)
+        );
     }
 
     #[test]

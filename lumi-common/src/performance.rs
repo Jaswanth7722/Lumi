@@ -22,13 +22,55 @@ pub struct SubsystemBudget {
 /// Complete performance budget summary for all subsystems.
 pub fn default_subsystem_budgets() -> Vec<SubsystemBudget> {
     vec![
-        SubsystemBudget { name: "render", cpu_percent_avg: 4.0, cpu_percent_burst: 12.0, gpu_time_ms: 5.8, memory_mb: 512 },
-        SubsystemBudget { name: "core-idle", cpu_percent_avg: 0.5, cpu_percent_burst: 0.5, gpu_time_ms: 0.0, memory_mb: 128 },
-        SubsystemBudget { name: "core-inference", cpu_percent_avg: 12.0, cpu_percent_burst: 60.0, gpu_time_ms: 0.0, memory_mb: 256 },
-        SubsystemBudget { name: "voice-listening", cpu_percent_avg: 2.0, cpu_percent_burst: 2.0, gpu_time_ms: 0.0, memory_mb: 64 },
-        SubsystemBudget { name: "voice-stt", cpu_percent_avg: 15.0, cpu_percent_burst: 15.0, gpu_time_ms: 0.0, memory_mb: 128 },
-        SubsystemBudget { name: "storage", cpu_percent_avg: 0.2, cpu_percent_burst: 0.2, gpu_time_ms: 0.0, memory_mb: 64 },
-        SubsystemBudget { name: "plugin-host", cpu_percent_avg: 2.0, cpu_percent_burst: 2.0, gpu_time_ms: 0.0, memory_mb: 64 },
+        SubsystemBudget {
+            name: "render",
+            cpu_percent_avg: 4.0,
+            cpu_percent_burst: 12.0,
+            gpu_time_ms: 5.8,
+            memory_mb: 512,
+        },
+        SubsystemBudget {
+            name: "core-idle",
+            cpu_percent_avg: 0.5,
+            cpu_percent_burst: 0.5,
+            gpu_time_ms: 0.0,
+            memory_mb: 128,
+        },
+        SubsystemBudget {
+            name: "core-inference",
+            cpu_percent_avg: 12.0,
+            cpu_percent_burst: 60.0,
+            gpu_time_ms: 0.0,
+            memory_mb: 256,
+        },
+        SubsystemBudget {
+            name: "voice-listening",
+            cpu_percent_avg: 2.0,
+            cpu_percent_burst: 2.0,
+            gpu_time_ms: 0.0,
+            memory_mb: 64,
+        },
+        SubsystemBudget {
+            name: "voice-stt",
+            cpu_percent_avg: 15.0,
+            cpu_percent_burst: 15.0,
+            gpu_time_ms: 0.0,
+            memory_mb: 128,
+        },
+        SubsystemBudget {
+            name: "storage",
+            cpu_percent_avg: 0.2,
+            cpu_percent_burst: 0.2,
+            gpu_time_ms: 0.0,
+            memory_mb: 64,
+        },
+        SubsystemBudget {
+            name: "plugin-host",
+            cpu_percent_avg: 2.0,
+            cpu_percent_burst: 2.0,
+            gpu_time_ms: 0.0,
+            memory_mb: 64,
+        },
     ]
 }
 
@@ -91,7 +133,9 @@ impl FramePacer {
         if let Some(last) = self.last_frame {
             let elapsed_us = last.elapsed().as_micros() as u64;
             if elapsed_us < budget_us {
-                let sleep_us = budget_us.saturating_sub(elapsed_us).saturating_sub(headroom_us);
+                let sleep_us = budget_us
+                    .saturating_sub(elapsed_us)
+                    .saturating_sub(headroom_us);
                 if sleep_us > 0 {
                     std::thread::sleep(std::time::Duration::from_micros(sleep_us));
                 }
@@ -188,7 +232,11 @@ mod tests {
     fn test_subsystem_budgets() {
         let budgets = default_subsystem_budgets();
         assert!(budgets.len() >= 7);
-        assert!(budgets.iter().any(|b| b.name == "render" && b.memory_mb == 512));
+        assert!(
+            budgets
+                .iter()
+                .any(|b| b.name == "render" && b.memory_mb == 512)
+        );
         let render = budgets.iter().find(|b| b.name == "render").unwrap();
         assert!((render.gpu_time_ms - 5.8).abs() < f32::EPSILON);
     }

@@ -49,10 +49,10 @@ impl Frame {
         let len = self.payload.len() as u32;
         let mut bytes = Vec::with_capacity(9 + self.payload.len());
 
-        bytes.extend_from_slice(PROTOCOL_MAGIC);    // 4 bytes: magic
-        bytes.push(PROTOCOL_VERSION);                // 1 byte: version
+        bytes.extend_from_slice(PROTOCOL_MAGIC); // 4 bytes: magic
+        bytes.push(PROTOCOL_VERSION); // 1 byte: version
         bytes.extend_from_slice(&len.to_le_bytes()); // 4 bytes: length (LE)
-        bytes.extend_from_slice(&self.payload);      // n bytes: payload
+        bytes.extend_from_slice(&self.payload); // n bytes: payload
 
         bytes
     }
@@ -147,9 +147,7 @@ impl FrameReader {
                     let payload_len = u32::from_le_bytes(len_bytes);
 
                     if payload_len > MAX_FRAME_SIZE {
-                        bail!(
-                            "Frame too large: {payload_len} bytes (max {MAX_FRAME_SIZE})"
-                        );
+                        bail!("Frame too large: {payload_len} bytes (max {MAX_FRAME_SIZE})");
                     }
 
                     self.expected_size = 9 + payload_len as usize;

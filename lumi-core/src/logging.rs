@@ -77,7 +77,11 @@ mod tests {
     #[test]
     fn test_audit_log() {
         let mut manager = LoggingManager::new("test");
-        manager.audit(AuditEntry::tool_executed("fs.read_file", AuditOutcome::Success, Some(true)));
+        manager.audit(AuditEntry::tool_executed(
+            "fs.read_file",
+            AuditOutcome::Success,
+            Some(true),
+        ));
         assert_eq!(manager.audit_log().len(), 1);
     }
 

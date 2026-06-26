@@ -214,13 +214,24 @@ mod tests {
     fn test_hotkey_bindings() {
         let bindings = default_hotkey_bindings();
         assert_eq!(bindings.len(), 5);
-        assert!(bindings.iter().any(|b| b.action == HotkeyAction::ToggleConversation));
-        assert!(bindings.iter().any(|b| b.action == HotkeyAction::DismissPanel));
+        assert!(
+            bindings
+                .iter()
+                .any(|b| b.action == HotkeyAction::ToggleConversation)
+        );
+        assert!(
+            bindings
+                .iter()
+                .any(|b| b.action == HotkeyAction::DismissPanel)
+        );
     }
 
     #[test]
     fn test_drag_state() {
-        let drag = DragState { offset: (10.0, 20.0), active: true };
+        let drag = DragState {
+            offset: (10.0, 20.0),
+            active: true,
+        };
         assert!(drag.active);
         assert_eq!(drag.offset.0, 10.0);
     }

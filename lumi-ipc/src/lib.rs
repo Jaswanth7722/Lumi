@@ -11,9 +11,9 @@
 //! - Cross-process transport via sockets/pipes
 //! - Automatic reconnection and health monitoring
 
-pub mod wire;
-pub mod transport;
 pub mod peer;
+pub mod transport;
+pub mod wire;
 
 use anyhow::Result;
 use dashmap::DashMap;

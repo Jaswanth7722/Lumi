@@ -4,7 +4,8 @@
 //! and tool invocation lifecycle.
 
 use lumi_common::tool::{
-    builtin_tools, Capability, InvokeToolRequest, SanitizationError, ToolDefinition, ToolError, ToolInputSanitizer,
+    Capability, InvokeToolRequest, SanitizationError, ToolDefinition, ToolError,
+    ToolInputSanitizer, builtin_tools,
 };
 use std::collections::HashMap;
 use tracing::{debug, info, warn};
@@ -63,13 +64,21 @@ impl ToolFramework {
     }
 
     /// Validate input against a tool's JSON Schema.
-    pub fn validate_input(&self, tool: &ToolDefinition, input: &serde_json::Value) -> Result<(), ToolError> {
+    pub fn validate_input(
+        &self,
+        tool: &ToolDefinition,
+        input: &serde_json::Value,
+    ) -> Result<(), ToolError> {
         // In production, use a JSON Schema validator library like jsonschema.
         // For the skeleton, just verify required fields exist.
         if let Some(required) = tool.input_schema.get("required").and_then(|r| r.as_array()) {
             for field in required {
                 if let Some(field_name) = field.as_str() {
-                    if !input.get(field_name).and_then(|v| if v.is_null() { None } else { Some(v) }).is_some() {
+                    if !input
+                        .get(field_name)
+                        .and_then(|v| if v.is_null() { None } else { Some(v) })
+                        .is_some()
+                    {
                         return Err(ToolError::InvalidInput(format!(
                             "Missing required field: {field_name}"
                         )));
@@ -81,9 +90,14 @@ impl ToolFramework {
     }
 
     /// Execute a tool with the given input.
-    pub fn execute_tool(&self, request: &InvokeToolRequest) -> Result<serde_json::Value, ToolError> {
+    pub fn execute_tool(
+        &self,
+        request: &InvokeToolRequest,
+    ) -> Result<serde_json::Value, ToolError> {
         // Validate input
-        let tool = self.tools.get(&request.name)
+        let tool = self
+            .tools
+            .get(&request.name)
             .ok_or_else(|| ToolError::NotFound(format!("Tool '{}' not found", request.name)))?;
 
         self.validate_input(tool, &request.input)?;
@@ -91,7 +105,10 @@ impl ToolFramework {
         // Check capabilities
         self.check_capabilities(&tool.capabilities_required)?;
 
-        debug!("Executing tool: {} (timeout: {}ms)", tool.name, tool.timeout_ms);
+        debug!(
+            "Executing tool: {} (timeout: {}ms)",
+            tool.name, tool.timeout_ms
+        );
 
         // In production, this would dispatch to the actual implementation.
         // For the skeleton, return a placeholder result.
@@ -150,16 +167,25 @@ mod tests {
         framework.grant_capability(Capability::FilesystemRead);
 
         // Should pass
-        assert!(framework.check_capabilities(&[Capability::FilesystemRead]).is_ok());
+        assert!(
+            framework
+                .check_capabilities(&[Capability::FilesystemRead])
+                .is_ok()
+        );
 
         // Should fail
-        assert!(framework.check_capabilities(&[Capability::FilesystemDelete]).is_err());
+        assert!(
+            framework
+                .check_capabilities(&[Capability::FilesystemDelete])
+                .is_err()
+        );
     }
 
     #[test]
     fn test_input_validation() {
         let framework = ToolFramework::new();
-        let tool = builtin_tools().into_iter()
+        let tool = builtin_tools()
+            .into_iter()
             .find(|t| t.name == "fs.read_file")
             .unwrap();
 

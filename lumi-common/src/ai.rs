@@ -3,12 +3,12 @@
 //! Defines the provider-agnostic inference interface, AI state signals,
 //! output routing types, and provider selection logic.
 
-use serde::{Deserialize, Serialize};
-use crate::plan::Plan;
-use crate::tool::ToolDefinition;
 use crate::memory::MemoryEntry;
-use crate::workspace::WorkspaceCommand;
+use crate::plan::Plan;
 use crate::state_machine::CharacterState;
+use crate::tool::ToolDefinition;
+use crate::workspace::WorkspaceCommand;
+use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------
 // AI State Signals

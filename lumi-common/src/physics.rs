@@ -17,11 +17,18 @@ pub enum WalkState {
     /// Initiating walk in a direction.
     StartWalk { direction: Direction },
     /// Actively walking.
-    Walking { direction: Direction, speed_blend: f32 },
+    Walking {
+        direction: Direction,
+        speed_blend: f32,
+    },
     /// Decelerating to a stop.
     StopWalk { last_direction: Direction },
     /// Turning to face a new direction.
-    Turn { from: Direction, to: Direction, progress: f32 },
+    Turn {
+        from: Direction,
+        to: Direction,
+        progress: f32,
+    },
 }
 
 /// Cardinal direction for character facing.
@@ -240,9 +247,16 @@ mod tests {
     fn test_walk_state_variants() {
         let states = vec![
             WalkState::Idle,
-            WalkState::StartWalk { direction: Direction::Right },
-            WalkState::Walking { direction: Direction::Left, speed_blend: 0.5 },
-            WalkState::StopWalk { last_direction: Direction::Up },
+            WalkState::StartWalk {
+                direction: Direction::Right,
+            },
+            WalkState::Walking {
+                direction: Direction::Left,
+                speed_blend: 0.5,
+            },
+            WalkState::StopWalk {
+                last_direction: Direction::Up,
+            },
         ];
         for state in states {
             let json = serde_json::to_value(&state).unwrap();

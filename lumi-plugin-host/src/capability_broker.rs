@@ -4,10 +4,10 @@
 //! Enforces the principle of least privilege — plugins can only
 //! use capabilities they've explicitly declared and have been granted.
 
+use anyhow::{Result, anyhow};
 use lumi_common::tool::Capability;
 use std::collections::HashMap;
 use tracing::debug;
-use anyhow::{Result, anyhow};
 
 /// Manages capability declarations and grants for plugins.
 pub struct CapabilityBroker {
@@ -23,10 +23,7 @@ impl CapabilityBroker {
     pub fn new() -> Self {
         Self {
             grants: HashMap::new(),
-            global_whitelist: vec![
-                Capability::FilesystemRead,
-                Capability::NetworkFetch,
-            ],
+            global_whitelist: vec![Capability::FilesystemRead, Capability::NetworkFetch],
             require_explicit_approval: true,
         }
     }
@@ -89,7 +86,11 @@ mod tests {
     #[test]
     fn test_initial_whitelist() {
         let broker = CapabilityBroker::new();
-        assert!(broker.global_whitelist().contains(&Capability::FilesystemRead));
+        assert!(
+            broker
+                .global_whitelist()
+                .contains(&Capability::FilesystemRead)
+        );
     }
 
     #[test]
@@ -112,7 +113,10 @@ mod tests {
     #[test]
     fn test_revoke_all() {
         let mut broker = CapabilityBroker::new();
-        broker.grant("test", vec![Capability::FilesystemWrite, Capability::ClipboardRead]);
+        broker.grant(
+            "test",
+            vec![Capability::FilesystemWrite, Capability::ClipboardRead],
+        );
         assert_eq!(broker.list_grants("test").len(), 2);
         broker.revoke_all("test");
         assert!(broker.list_grants("test").is_empty());

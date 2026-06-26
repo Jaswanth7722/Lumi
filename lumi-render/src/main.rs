@@ -3,27 +3,27 @@
 //! GPU-side rendering subsystem for the Lumi character and workspace panels.
 //! Uses wgpu for cross-platform GPU abstraction (Metal/DX12/Vulkan).
 
-use lumi_common::ipc::{Channel, LumiMessage, ProcessId};
 use lumi_common::character::{CharacterDrawCall, CrystalState};
-use lumi_common::render::{RenderPipelineConfig, LODSystemConfig, LightingConfig, RenderBudget};
+use lumi_common::ipc::{Channel, LumiMessage, ProcessId};
+use lumi_common::render::{LODSystemConfig, LightingConfig, RenderBudget, RenderPipelineConfig};
 use lumi_common::state_machine::StateCommand;
 use lumi_ipc::MessageBus;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::sync::RwLock;
 use tracing::{debug, error, info, warn};
 
-mod character_engine;
 mod animation_engine;
+mod character_engine;
+mod desktop_engine;
 mod rendering_engine;
 mod workspace_system;
-mod desktop_engine;
 
-use character_engine::CharacterEngine;
 use animation_engine::AnimationEngine;
+use character_engine::CharacterEngine;
+use desktop_engine::DesktopEngine;
 use rendering_engine::RenderingEngine;
 use workspace_system::WorkspaceSystem;
-use desktop_engine::DesktopEngine;
 
 /// Shared application state for the render process.
 pub struct RenderState {

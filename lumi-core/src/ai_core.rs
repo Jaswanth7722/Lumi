@@ -78,10 +78,17 @@ impl AICore {
     pub fn route_output(&self, output: AIOutput) {
         match output {
             AIOutput::Conversation(response) => {
-                debug!("Routing conversation response: {} chars", response.text.len());
+                debug!(
+                    "Routing conversation response: {} chars",
+                    response.text.len()
+                );
             }
             AIOutput::PlanCreated(plan) => {
-                info!("Plan created: {} with {} steps", plan.title, plan.steps.len());
+                info!(
+                    "Plan created: {} with {} steps",
+                    plan.title,
+                    plan.steps.len()
+                );
             }
             AIOutput::ToolCall(request) => {
                 debug!("Tool call requested: {}", request.name);

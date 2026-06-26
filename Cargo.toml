@@ -9,6 +9,12 @@ members = [
     "lumi-storage",
     "lumi-plugin-host",
     "lumi-sdk",
+    "crates/lumi-runtime",
+    "crates/lumi-config",
+    "crates/lumi-logging",
+    "crates/lumi-error",
+    "crates/lumi-performance",
+    "crates/lumi-state",
 ]
 
 [workspace.package]

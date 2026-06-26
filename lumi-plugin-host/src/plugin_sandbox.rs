@@ -67,7 +67,11 @@ impl PluginSandbox {
     }
 
     /// Execute a tool call within a plugin sandbox.
-    pub fn execute(&mut self, _tool_name: &str, _input: &serde_json::Value) -> anyhow::Result<serde_json::Value> {
+    pub fn execute(
+        &mut self,
+        _tool_name: &str,
+        _input: &serde_json::Value,
+    ) -> anyhow::Result<serde_json::Value> {
         // In production: instantiate the Wasm module, execute the function,
         // enforce capability checks, and return the result.
         Ok(serde_json::json!({

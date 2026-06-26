@@ -57,10 +57,7 @@ impl PluginRegistry {
 
     /// Get all tool definitions from registered plugins.
     pub fn all_tools(&self) -> Vec<&ToolDefinition> {
-        self.plugins
-            .values()
-            .flat_map(|p| p.tools.iter())
-            .collect()
+        self.plugins.values().flat_map(|p| p.tools.iter()).collect()
     }
 
     /// Check if a plugin is registered.

@@ -49,11 +49,36 @@ pub struct PrivacyTierConfig {
 /// Returns default privacy tier configurations.
 pub fn default_privacy_config() -> Vec<PrivacyTierConfig> {
     vec![
-        PrivacyTierConfig { tier: PrivacyTier::System, enabled: true, requires_approval: false, can_user_disable: false },
-        PrivacyTierConfig { tier: PrivacyTier::Low, enabled: true, requires_approval: false, can_user_disable: true },
-        PrivacyTierConfig { tier: PrivacyTier::Medium, enabled: false, requires_approval: true, can_user_disable: true },
-        PrivacyTierConfig { tier: PrivacyTier::High, enabled: false, requires_approval: true, can_user_disable: true },
-        PrivacyTierConfig { tier: PrivacyTier::Sensitive, enabled: false, requires_approval: true, can_user_disable: false },
+        PrivacyTierConfig {
+            tier: PrivacyTier::System,
+            enabled: true,
+            requires_approval: false,
+            can_user_disable: false,
+        },
+        PrivacyTierConfig {
+            tier: PrivacyTier::Low,
+            enabled: true,
+            requires_approval: false,
+            can_user_disable: true,
+        },
+        PrivacyTierConfig {
+            tier: PrivacyTier::Medium,
+            enabled: false,
+            requires_approval: true,
+            can_user_disable: true,
+        },
+        PrivacyTierConfig {
+            tier: PrivacyTier::High,
+            enabled: false,
+            requires_approval: true,
+            can_user_disable: true,
+        },
+        PrivacyTierConfig {
+            tier: PrivacyTier::Sensitive,
+            enabled: false,
+            requires_approval: true,
+            can_user_disable: false,
+        },
     ]
 }
 
@@ -101,7 +126,9 @@ pub struct PIIDetector {
 
 impl PIIDetector {
     pub fn new() -> Self {
-        Self { patterns: default_pii_patterns() }
+        Self {
+            patterns: default_pii_patterns(),
+        }
     }
 
     /// Scan content for PII and return the first detected action.
@@ -111,7 +138,9 @@ impl PIIDetector {
             let lower = content.to_lowercase();
             let matched = match pattern.category {
                 PIICategory::Email => lower.contains('@') && lower.contains('.'),
-                PIICategory::CreditCard => content.chars().filter(|c| c.is_ascii_digit()).count() >= 13,
+                PIICategory::CreditCard => {
+                    content.chars().filter(|c| c.is_ascii_digit()).count() >= 13
+                }
                 PIICategory::APIKey => {
                     let alphanumeric = content.chars().filter(|c| c.is_alphanumeric()).count();
                     content.len() >= 20
@@ -145,12 +174,16 @@ pub fn default_pii_patterns() -> Vec<PIIPattern> {
         PIIPattern {
             category: PIICategory::Email,
             description: "Email address".into(),
-            action: PIIAction::Redact { placeholder: "[email]".into() },
+            action: PIIAction::Redact {
+                placeholder: "[email]".into(),
+            },
         },
         PIIPattern {
             category: PIICategory::APIKey,
             description: "API key or token".into(),
-            action: PIIAction::Warn { message: "Content may contain an API key".into() },
+            action: PIIAction::Warn {
+                message: "Content may contain an API key".into(),
+            },
         },
         PIIPattern {
             category: PIICategory::Password,
@@ -247,7 +280,7 @@ mod tests {
         let result = detector.scan("Contact me at user@example.com");
         assert!(result.is_some());
         match result.unwrap() {
-            PIIAction::Redact { .. } => {},
+            PIIAction::Redact { .. } => {}
             other => panic!("Expected Redact, got {:?}", other),
         }
     }
@@ -258,7 +291,7 @@ mod tests {
         let result = detector.scan("My card is 4111 1111 1111 1111");
         assert!(result.is_some());
         match result.unwrap() {
-            PIIAction::Block => {},
+            PIIAction::Block => {}
             other => panic!("Expected Block, got {:?}", other),
         }
     }

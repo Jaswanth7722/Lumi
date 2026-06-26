@@ -79,7 +79,8 @@ impl DesktopAwareness {
         if was_focus != self.focus_mode {
             if self.focus_mode {
                 debug!("Focus mode activated");
-                self.recent_events.push(DesktopEvent::UserInputDetected(InputType::None));
+                self.recent_events
+                    .push(DesktopEvent::UserInputDetected(InputType::None));
             } else {
                 debug!("Focus mode deactivated");
             }
@@ -101,8 +102,7 @@ impl DesktopAwareness {
 
     /// Register an idle event.
     pub fn register_idle(&mut self) {
-        self.snapshot.user_activity.idle_seconds =
-            self.focus_config.idle_threshold_seconds as u64;
+        self.snapshot.user_activity.idle_seconds = self.focus_config.idle_threshold_seconds as u64;
         self.recent_events.push(DesktopEvent::UserIdle);
     }
 
@@ -166,7 +166,10 @@ mod tests {
         let mut awareness = DesktopAwareness::new();
         awareness.register_input(InputType::Keyboard);
         assert_eq!(awareness.idle_seconds(), 0);
-        assert_eq!(awareness.snapshot.user_activity.last_input_type, InputType::Keyboard);
+        assert_eq!(
+            awareness.snapshot.user_activity.last_input_type,
+            InputType::Keyboard
+        );
     }
 
     #[test]

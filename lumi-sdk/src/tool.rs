@@ -2,7 +2,7 @@
 //!
 //! Helper types for defining tools in the SDK.
 
-use lumi_common::tool::{Capability, ToolDefinition, ToolCategory};
+use lumi_common::tool::{Capability, ToolCategory, ToolDefinition};
 
 /// Builder for creating tool definitions in plugins.
 pub struct ToolDef {

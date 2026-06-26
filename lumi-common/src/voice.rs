@@ -204,20 +204,42 @@ pub struct LipSyncFrame {
 /// Viseme phoneme categories for mouth animation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Viseme {
-    PP, FF, TH, DD, Kk,
-    CH, SS, Nn, RR, Aa,
-    Ee, Ih, Oh, Ou, Rest,
+    PP,
+    FF,
+    TH,
+    DD,
+    Kk,
+    CH,
+    SS,
+    Nn,
+    RR,
+    Aa,
+    Ee,
+    Ih,
+    Oh,
+    Ou,
+    Rest,
 }
 
 impl Viseme {
     /// Returns the index of this viseme (0-14).
     pub fn index(&self) -> usize {
         match self {
-            Viseme::PP => 0, Viseme::FF => 1, Viseme::TH => 2,
-            Viseme::DD => 3, Viseme::Kk => 4, Viseme::CH => 5,
-            Viseme::SS => 6, Viseme::Nn => 7, Viseme::RR => 8,
-            Viseme::Aa => 9, Viseme::Ee => 10, Viseme::Ih => 11,
-            Viseme::Oh => 12, Viseme::Ou => 13, Viseme::Rest => 14,
+            Viseme::PP => 0,
+            Viseme::FF => 1,
+            Viseme::TH => 2,
+            Viseme::DD => 3,
+            Viseme::Kk => 4,
+            Viseme::CH => 5,
+            Viseme::SS => 6,
+            Viseme::Nn => 7,
+            Viseme::RR => 8,
+            Viseme::Aa => 9,
+            Viseme::Ee => 10,
+            Viseme::Ih => 11,
+            Viseme::Oh => 12,
+            Viseme::Ou => 13,
+            Viseme::Rest => 14,
         }
     }
 }

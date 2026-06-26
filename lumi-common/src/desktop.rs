@@ -185,7 +185,12 @@ mod tests {
                 title: "VSCode".into(),
                 application: "Visual Studio Code".into(),
                 bundle_id: Some("com.microsoft.VSCode".into()),
-                bounds: Some(WindowBounds { x: 0.0, y: 0.0, width: 1200.0, height: 800.0 }),
+                bounds: Some(WindowBounds {
+                    x: 0.0,
+                    y: 0.0,
+                    width: 1200.0,
+                    height: 800.0,
+                }),
                 pid: Some(12345),
             },
             open_windows: vec![],

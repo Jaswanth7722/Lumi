@@ -8,22 +8,22 @@
 
 use lumi_common::ipc::{Channel, LumiMessage, MessageType, ProcessId};
 use lumi_common::memory::{
-    MemoryQuery, MemoryQueryResult, QueryMemoryRequest, RetrieverConfig, RetentionConfig,
+    MemoryQuery, MemoryQueryResult, QueryMemoryRequest, RetentionConfig, RetrieverConfig,
     WriteMemoryRequest, WriteMemoryResult,
 };
 use lumi_ipc::MessageBus;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::sync::RwLock;
 use tracing::{debug, error, info, warn};
 
-mod memory_store;
-mod config_store;
 mod asset_cache;
+mod config_store;
+mod memory_store;
 
-use memory_store::MemoryStore;
-use config_store::ConfigStore;
 use asset_cache::AssetCache;
+use config_store::ConfigStore;
+use memory_store::MemoryStore;
 
 /// Shared application state for the storage process.
 pub struct StorageState {

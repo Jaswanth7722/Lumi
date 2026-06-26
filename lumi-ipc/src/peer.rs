@@ -7,7 +7,9 @@
 //! - Reconnection on connection loss
 //! - Heartbeat and health monitoring
 
-use crate::transport::{IoStream, TransportConnection, TransportListener, connect_to_peer, ensure_runtime_dir};
+use crate::transport::{
+    IoStream, TransportConnection, TransportListener, connect_to_peer, ensure_runtime_dir,
+};
 use crate::wire::{Frame, FrameReader, FrameWriter};
 use anyhow::{Result, anyhow};
 use lumi_common::ipc::{Channel, LumiMessage, ProcessId};
@@ -89,12 +91,15 @@ impl PeerManager {
                                     }
                                 };
                                 let mut stream = conn.stream().await;
-                                if let Err(e) = FrameWriter::write_frame(&mut *stream, &frame).await {
+                                if let Err(e) = FrameWriter::write_frame(&mut *stream, &frame).await
+                                {
                                     warn!("Failed to send message to {target}: {e}");
                                     drop(stream);
                                     // Mark connection for reconnection
                                     drop(conns);
-                                    if let Some(mut conn) = connections.write().await.get_mut(&target) {
+                                    if let Some(mut conn) =
+                                        connections.write().await.get_mut(&target)
+                                    {
                                         conn.mark_dead();
                                     }
                                 }
@@ -107,7 +112,10 @@ impl PeerManager {
                             warn!("No connection to peer: {target}");
                         }
                     }
-                    PeerCommand::ConnectToPeer { peer_id, runtime_dir } => {
+                    PeerCommand::ConnectToPeer {
+                        peer_id,
+                        runtime_dir,
+                    } => {
                         let path = Path::new(&runtime_dir);
                         match connect_to_peer(&peer_id, path).await {
                             Ok(mut stream) => {
@@ -115,7 +123,8 @@ impl PeerManager {
                                 let handshake = create_handshake(&local_id_clone);
                                 let frame = Frame::from_message(&handshake)
                                     .expect("Failed to create handshake frame");
-                                if let Err(e) = FrameWriter::write_frame(&mut *stream, &frame).await {
+                                if let Err(e) = FrameWriter::write_frame(&mut *stream, &frame).await
+                                {
                                     warn!("Failed to send handshake to {peer_id}: {e}");
                                     continue;
                                 }
@@ -148,10 +157,7 @@ impl PeerManager {
         ensure_runtime_dir(runtime_dir).await?;
 
         let listener = TransportListener::bind(&self.local_id, runtime_dir).await?;
-        info!(
-            "Peer manager listening at: {}",
-            listener.local_path()
-        );
+        info!("Peer manager listening at: {}", listener.local_path());
 
         let local_id = self.local_id.clone();
         let connections = self.connections.clone();
@@ -165,7 +171,9 @@ impl PeerManager {
                         let connections = connections.clone();
                         let local_id = local_id.clone();
                         tokio::spawn(async move {
-                            if let Err(e) = handle_inbound_connection(stream, connections, &local_id).await {
+                            if let Err(e) =
+                                handle_inbound_connection(stream, connections, &local_id).await
+                            {
                                 debug!("Inbound connection handler finished: {e}");
                             }
                         });
@@ -184,10 +192,14 @@ impl PeerManager {
     /// Connect to a peer process.
     pub async fn connect_to(&self, peer_id: ProcessId, runtime_dir: &Path) {
         let runtime_dir_str = runtime_dir.to_string_lossy().to_string();
-        if let Err(e) = self.command_tx.send(PeerCommand::ConnectToPeer {
-            peer_id,
-            runtime_dir: runtime_dir_str,
-        }).await {
+        if let Err(e) = self
+            .command_tx
+            .send(PeerCommand::ConnectToPeer {
+                peer_id,
+                runtime_dir: runtime_dir_str,
+            })
+            .await
+        {
             error!("Failed to queue connect command: {e}");
         }
     }
@@ -195,10 +207,11 @@ impl PeerManager {
     /// Send a message to a specific peer.
     pub async fn send_to(&self, target: ProcessId, message: LumiMessage) {
         let target_for_log = target.clone();
-        if let Err(e) = self.command_tx.send(PeerCommand::SendMessage {
-            target,
-            message,
-        }).await {
+        if let Err(e) = self
+            .command_tx
+            .send(PeerCommand::SendMessage { target, message })
+            .await
+        {
             error!("Failed to queue message for {target_for_log}: {e}");
         }
     }
@@ -220,10 +233,12 @@ impl PeerManager {
             let cmd_tx = self.command_tx.clone();
             let target = peer_id.clone();
             tokio::spawn(async move {
-                let _ = cmd_tx.send(PeerCommand::SendMessage {
-                    target,
-                    message: msg,
-                }).await;
+                let _ = cmd_tx
+                    .send(PeerCommand::SendMessage {
+                        target,
+                        message: msg,
+                    })
+                    .await;
             });
         }
     }
@@ -257,7 +272,9 @@ async fn handle_inbound_connection(
     let mut reader = FrameReader::new();
 
     // The first message from a peer should be a handshake identifying themselves
-    let handshake_frame = reader.read_frame(&mut stream).await?
+    let handshake_frame = reader
+        .read_frame(&mut stream)
+        .await?
         .ok_or_else(|| anyhow!("Peer closed connection during handshake"))?;
 
     let handshake_msg = handshake_frame.into_message()?;
@@ -287,8 +304,7 @@ async fn read_from_peer(
 ) {
     let stream = {
         let conns = connections.read().await;
-        conns.get(&peer_id)
-            .map(|c| c.clone_stream())
+        conns.get(&peer_id).map(|c| c.clone_stream())
     };
 
     let stream_arc = match stream {
@@ -348,7 +364,8 @@ pub fn create_handshake(local_id: &ProcessId) -> LumiMessage {
             "process": local_id.to_string(),
             "version": 1,
         }),
-    ).expect("Failed to create handshake message")
+    )
+    .expect("Failed to create handshake message")
 }
 
 #[cfg(test)]

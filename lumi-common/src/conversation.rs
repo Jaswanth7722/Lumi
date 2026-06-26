@@ -40,9 +40,16 @@ pub enum MessageContent {
     #[serde(rename = "file")]
     File { name: String, content: String },
     #[serde(rename = "tool_use")]
-    ToolUse { id: String, name: String, input: serde_json::Value },
+    ToolUse {
+        id: String,
+        name: String,
+        input: serde_json::Value,
+    },
     #[serde(rename = "tool_result")]
-    ToolResult { tool_use_id: String, content: serde_json::Value },
+    ToolResult {
+        tool_use_id: String,
+        content: serde_json::Value,
+    },
 }
 
 /// Metadata attached to each conversation message.

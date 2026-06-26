@@ -4,8 +4,8 @@
 //! that appear beside Lumi during active AI operations.
 
 use lumi_common::workspace::{
-    PanelContent, PanelId, PanelState, PanelStatus, PanelType, PreferredSide, Rect, Size,
-    SectionContentType, compute_panel_position, PanelSection,
+    PanelContent, PanelId, PanelSection, PanelState, PanelStatus, PanelType, PreferredSide, Rect,
+    SectionContentType, Size, compute_panel_position,
 };
 use std::collections::HashMap;
 use tracing::debug;
@@ -215,11 +215,19 @@ mod tests {
         let id = ws.show_panel(PanelType::Memory);
 
         ws.pin_panel(&id);
-        let panel = ws.active_panels().into_iter().find(|p| p.panel_id == id).unwrap();
+        let panel = ws
+            .active_panels()
+            .into_iter()
+            .find(|p| p.panel_id == id)
+            .unwrap();
         assert_eq!(panel.state, PanelState::Pinned);
 
         ws.unpin_panel(&id);
-        let panel = ws.active_panels().into_iter().find(|p| p.panel_id == id).unwrap();
+        let panel = ws
+            .active_panels()
+            .into_iter()
+            .find(|p| p.panel_id == id)
+            .unwrap();
         assert_eq!(panel.state, PanelState::Visible);
     }
 
@@ -227,10 +235,20 @@ mod tests {
     fn test_reposition_on_lumi_move() {
         let mut ws = WorkspaceSystem::new();
         let id = ws.show_panel(PanelType::Plan);
-        let original_pos = ws.active_panels().iter().find(|p| p.panel_id == id).unwrap().position;
+        let original_pos = ws
+            .active_panels()
+            .iter()
+            .find(|p| p.panel_id == id)
+            .unwrap()
+            .position;
 
         ws.update_lumi_position(Rect::new(100.0, 100.0, 100.0, 150.0));
-        let new_pos = ws.active_panels().iter().find(|p| p.panel_id == id).unwrap().position;
+        let new_pos = ws
+            .active_panels()
+            .iter()
+            .find(|p| p.panel_id == id)
+            .unwrap()
+            .position;
 
         assert_ne!(original_pos, new_pos);
     }

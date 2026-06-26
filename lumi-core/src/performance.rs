@@ -82,8 +82,11 @@ impl ResponseCache {
     }
 
     pub fn get(&self, query: &str) -> Option<&str> {
-        self.entries.iter()
-            .find(|e| e.query == query && e.created_at.elapsed().as_secs() < self.config.max_age_secs)
+        self.entries
+            .iter()
+            .find(|e| {
+                e.query == query && e.created_at.elapsed().as_secs() < self.config.max_age_secs
+            })
             .map(|e| e.response.as_str())
     }
 
@@ -129,7 +132,11 @@ mod tests {
 
     #[test]
     fn test_cache_eviction() {
-        let config = ResponseCacheConfig { max_entries: 2, max_age_secs: 3600, enabled: true };
+        let config = ResponseCacheConfig {
+            max_entries: 2,
+            max_age_secs: 3600,
+            enabled: true,
+        };
         let mut cache = ResponseCache::new(config);
         cache.put("a", "1".into());
         cache.put("b", "2".into());

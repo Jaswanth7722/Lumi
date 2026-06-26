@@ -3,13 +3,13 @@
 //! Defines the LumiState hierarchy, state transition rules, event triggers,
 //! state commands consumed by downstream systems, and the core transition engine.
 
-use serde::{Deserialize, Serialize};
 use crate::ai::AIState;
+use crate::animation::{BlendMode, ClipId, EarPose};
 use crate::character::CrystalState;
-use crate::animation::{BlendMode, EarPose, ClipId};
 use crate::emotion::EmotionState;
-use crate::workspace::PanelType;
 use crate::position::PositionTarget;
+use crate::workspace::PanelType;
+use serde::{Deserialize, Serialize};
 
 use crate::conversation::DetectedIntent;
 use crate::plan::{PlanId, StepId};
@@ -44,7 +44,10 @@ pub enum LumiState {
     /// Waiting for user confirmation before proceeding.
     AwaitingConfirmation { plan: PlanId, step: StepId },
     /// An error occurred, with recovery hint.
-    Error { error: String, recovery: RecoveryHint },
+    Error {
+        error: String,
+        recovery: RecoveryHint,
+    },
 }
 
 /// Phases within the greeting state.
@@ -131,7 +134,10 @@ pub enum CharacterState {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StateEvent {
     /// New user input received.
-    UserInput { source: InputSource, content: String },
+    UserInput {
+        source: InputSource,
+        content: String,
+    },
     /// Wake word detected.
     WakeWord { confidence: f32 },
     /// Voice speech ended.
@@ -280,7 +286,9 @@ pub fn default_transition_rules() -> Vec<TransitionRule> {
         TransitionRule {
             from: StatePattern::Exact(LumiState::Initializing),
             trigger: Trigger::Event(StateEvent::StartupComplete),
-            to: LumiState::Greeting { phase: GreetingPhase::Starting },
+            to: LumiState::Greeting {
+                phase: GreetingPhase::Starting,
+            },
             guard_description: None,
             actions: vec![
                 StateAction::EmitAIState(AIState::ReceivingInput),
@@ -289,33 +297,36 @@ pub fn default_transition_rules() -> Vec<TransitionRule> {
         },
         // Greeting → Idle
         TransitionRule {
-            from: StatePattern::Exact(LumiState::Greeting { phase: GreetingPhase::Starting }),
+            from: StatePattern::Exact(LumiState::Greeting {
+                phase: GreetingPhase::Starting,
+            }),
             trigger: Trigger::Event(StateEvent::GreetingComplete),
             to: LumiState::Idle(IdleSubState::Watching),
             guard_description: None,
-            actions: vec![
-                StateAction::EmitAIState(AIState::Idle),
-            ],
+            actions: vec![StateAction::EmitAIState(AIState::Idle)],
         },
         // Idle → Listening
         TransitionRule {
             from: StatePattern::IdleAny,
-            trigger: Trigger::Event(StateEvent::UserInput { source: InputSource::Keyboard, content: String::new() }),
-            to: LumiState::Listening { source: InputSource::Keyboard },
+            trigger: Trigger::Event(StateEvent::UserInput {
+                source: InputSource::Keyboard,
+                content: String::new(),
+            }),
+            to: LumiState::Listening {
+                source: InputSource::Keyboard,
+            },
             guard_description: None,
-            actions: vec![
-                StateAction::EmitAIState(AIState::Listening),
-            ],
+            actions: vec![StateAction::EmitAIState(AIState::Listening)],
         },
         // Idle → Listening (wake word)
         TransitionRule {
             from: StatePattern::IdleAny,
             trigger: Trigger::Event(StateEvent::WakeWord { confidence: 0.0 }),
-            to: LumiState::Listening { source: InputSource::Voice },
+            to: LumiState::Listening {
+                source: InputSource::Voice,
+            },
             guard_description: None,
-            actions: vec![
-                StateAction::EmitAIState(AIState::Listening),
-            ],
+            actions: vec![StateAction::EmitAIState(AIState::Listening)],
         },
         // Idle → Sleeping (after 15 min inactivity)
         TransitionRule {
@@ -323,25 +334,23 @@ pub fn default_transition_rules() -> Vec<TransitionRule> {
             trigger: Trigger::Event(StateEvent::UserIdle { seconds: 900 }),
             to: LumiState::Sleeping,
             guard_description: None,
-            actions: vec![
-                StateAction::SetCrystalState(CrystalState {
-                    mode: crate::character::CrystalMode::Sleep,
-                    intensity: 0.1,
-                    color: crate::character::CrystalColor::WhiteSleep,
-                    pulse_rate: 0.5,
-                    particle_emit: false,
-                }),
-            ],
+            actions: vec![StateAction::SetCrystalState(CrystalState {
+                mode: crate::character::CrystalMode::Sleep,
+                intensity: 0.1,
+                color: crate::character::CrystalColor::WhiteSleep,
+                pulse_rate: 0.5,
+                particle_emit: false,
+            })],
         },
         // Idle → FocusMode
         TransitionRule {
             from: StatePattern::IdleAny,
             trigger: Trigger::Event(StateEvent::FocusDetected),
             to: LumiState::FocusMode,
-            guard_description: Some(String::from("System do-not-disturb or fullscreen app active")),
-            actions: vec![
-                StateAction::EmitAIState(AIState::Idle),
-            ],
+            guard_description: Some(String::from(
+                "System do-not-disturb or fullscreen app active",
+            )),
+            actions: vec![StateAction::EmitAIState(AIState::Idle)],
         },
         // FocusMode → Idle
         TransitionRule {
@@ -353,29 +362,34 @@ pub fn default_transition_rules() -> Vec<TransitionRule> {
         },
         // Listening → Processing (after speech end)
         TransitionRule {
-            from: StatePattern::Exact(LumiState::Listening { source: InputSource::Voice }),
-            trigger: Trigger::Event(StateEvent::SpeechEnd { transcript: String::new() }),
+            from: StatePattern::Exact(LumiState::Listening {
+                source: InputSource::Voice,
+            }),
+            trigger: Trigger::Event(StateEvent::SpeechEnd {
+                transcript: String::new(),
+            }),
             to: LumiState::Processing { intent: None },
             guard_description: None,
-            actions: vec![
-                StateAction::EmitAIState(AIState::Thinking),
-            ],
+            actions: vec![StateAction::EmitAIState(AIState::Thinking)],
         },
         // Processing → Responding
         TransitionRule {
             from: StatePattern::Exact(LumiState::Processing { intent: None }),
             trigger: Trigger::Event(StateEvent::InferenceComplete),
-            to: LumiState::Responding { response_type: ResponseType::Text },
+            to: LumiState::Responding {
+                response_type: ResponseType::Text,
+            },
             guard_description: Some(String::from("No tools required")),
-            actions: vec![
-                StateAction::EmitAIState(AIState::GeneratingResponse),
-            ],
+            actions: vec![StateAction::EmitAIState(AIState::GeneratingResponse)],
         },
         // Processing → Planning
         TransitionRule {
             from: StatePattern::Exact(LumiState::Processing { intent: None }),
             trigger: Trigger::Event(StateEvent::PlanGenerated(String::new())),
-            to: LumiState::Planning { plan: String::new(), phase: PlanningPhase::Analyzing },
+            to: LumiState::Planning {
+                plan: String::new(),
+                phase: PlanningPhase::Analyzing,
+            },
             guard_description: Some(String::from("Plan was generated from request")),
             actions: vec![
                 StateAction::EmitAIState(AIState::Planning),
@@ -384,7 +398,9 @@ pub fn default_transition_rules() -> Vec<TransitionRule> {
         },
         // Responding → Idle
         TransitionRule {
-            from: StatePattern::Exact(LumiState::Responding { response_type: ResponseType::Text }),
+            from: StatePattern::Exact(LumiState::Responding {
+                response_type: ResponseType::Text,
+            }),
             trigger: Trigger::Event(StateEvent::ResponseComplete),
             to: LumiState::Idle(IdleSubState::Watching),
             guard_description: None,
@@ -392,19 +408,29 @@ pub fn default_transition_rules() -> Vec<TransitionRule> {
         },
         // Executing → Idle (plan complete)
         TransitionRule {
-            from: StatePattern::Exact(LumiState::Executing { plan: String::new(), step: String::new() }),
+            from: StatePattern::Exact(LumiState::Executing {
+                plan: String::new(),
+                step: String::new(),
+            }),
             trigger: Trigger::Event(StateEvent::PlanComplete(String::new())),
             to: LumiState::Idle(IdleSubState::Watching),
             guard_description: None,
-            actions: vec![
-                StateAction::EmitAIState(AIState::Success),
-            ],
+            actions: vec![StateAction::EmitAIState(AIState::Success)],
         },
         // Executing → AwaitingConfirmation
         TransitionRule {
-            from: StatePattern::Exact(LumiState::Executing { plan: String::new(), step: String::new() }),
-            trigger: Trigger::Event(StateEvent::ConfirmationRequired(String::new(), String::new())),
-            to: LumiState::AwaitingConfirmation { plan: String::new(), step: String::new() },
+            from: StatePattern::Exact(LumiState::Executing {
+                plan: String::new(),
+                step: String::new(),
+            }),
+            trigger: Trigger::Event(StateEvent::ConfirmationRequired(
+                String::new(),
+                String::new(),
+            )),
+            to: LumiState::AwaitingConfirmation {
+                plan: String::new(),
+                step: String::new(),
+            },
             guard_description: Some(String::from("Tool requires user approval")),
             actions: vec![
                 StateAction::EmitAIState(AIState::AwaitingConfirmation),
@@ -413,17 +439,24 @@ pub fn default_transition_rules() -> Vec<TransitionRule> {
         },
         // AwaitingConfirmation → Executing
         TransitionRule {
-            from: StatePattern::Exact(LumiState::AwaitingConfirmation { plan: String::new(), step: String::new() }),
+            from: StatePattern::Exact(LumiState::AwaitingConfirmation {
+                plan: String::new(),
+                step: String::new(),
+            }),
             trigger: Trigger::Event(StateEvent::UserApproved(String::new(), String::new())),
-            to: LumiState::Executing { plan: String::new(), step: String::new() },
+            to: LumiState::Executing {
+                plan: String::new(),
+                step: String::new(),
+            },
             guard_description: None,
-            actions: vec![
-                StateAction::EmitAIState(AIState::ExecutingTool),
-            ],
+            actions: vec![StateAction::EmitAIState(AIState::ExecutingTool)],
         },
         // AwaitingConfirmation → Idle (cancelled)
         TransitionRule {
-            from: StatePattern::Exact(LumiState::AwaitingConfirmation { plan: String::new(), step: String::new() }),
+            from: StatePattern::Exact(LumiState::AwaitingConfirmation {
+                plan: String::new(),
+                step: String::new(),
+            }),
             trigger: Trigger::Event(StateEvent::UserCancelled(String::new(), String::new())),
             to: LumiState::Idle(IdleSubState::Watching),
             guard_description: None,
@@ -433,11 +466,12 @@ pub fn default_transition_rules() -> Vec<TransitionRule> {
         TransitionRule {
             from: StatePattern::Any,
             trigger: Trigger::Event(StateEvent::Error(String::new())),
-            to: LumiState::Error { error: String::new(), recovery: RecoveryHint::AskUser },
+            to: LumiState::Error {
+                error: String::new(),
+                recovery: RecoveryHint::AskUser,
+            },
             guard_description: None,
-            actions: vec![
-                StateAction::EmitAIState(AIState::Error),
-            ],
+            actions: vec![StateAction::EmitAIState(AIState::Error)],
         },
     ]
 }
@@ -459,12 +493,18 @@ mod tests {
         for rule in &rules {
             // Every rule should have a target state
             match &rule.to {
-                LumiState::Listening { .. } | LumiState::Processing { .. } |
-                LumiState::Responding { .. } | LumiState::Planning { .. } |
-                LumiState::Executing { .. } | LumiState::AwaitingConfirmation { .. } |
-                LumiState::Error { .. } | LumiState::Idle(_) | LumiState::FocusMode |
-                LumiState::Sleeping | LumiState::Initializing |
-                LumiState::Greeting { .. } => {},
+                LumiState::Listening { .. }
+                | LumiState::Processing { .. }
+                | LumiState::Responding { .. }
+                | LumiState::Planning { .. }
+                | LumiState::Executing { .. }
+                | LumiState::AwaitingConfirmation { .. }
+                | LumiState::Error { .. }
+                | LumiState::Idle(_)
+                | LumiState::FocusMode
+                | LumiState::Sleeping
+                | LumiState::Initializing
+                | LumiState::Greeting { .. } => {}
             }
         }
     }
@@ -494,8 +534,13 @@ mod tests {
             LumiState::Idle(IdleSubState::Watching),
             LumiState::Sleeping,
             LumiState::FocusMode,
-            LumiState::Listening { source: InputSource::Keyboard },
-            LumiState::Error { error: "test".into(), recovery: RecoveryHint::Retry },
+            LumiState::Listening {
+                source: InputSource::Keyboard,
+            },
+            LumiState::Error {
+                error: "test".into(),
+                recovery: RecoveryHint::Retry,
+            },
         ];
         for state in states {
             let json = serde_json::to_value(&state).unwrap();

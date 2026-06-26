@@ -10,18 +10,18 @@ use lumi_common::ipc::{Channel, LumiMessage, MessageType, ProcessId};
 use lumi_common::tool::{Capability, ToolDefinition, ToolError};
 use lumi_ipc::MessageBus;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::sync::RwLock;
 use tracing::{debug, error, info, warn};
 
+mod capability_broker;
 mod plugin_registry;
 mod plugin_sandbox;
-mod capability_broker;
 
+use capability_broker::CapabilityBroker;
 use plugin_registry::PluginRegistry;
 use plugin_sandbox::PluginSandbox;
-use capability_broker::CapabilityBroker;
 
 /// Shared application state for the plugin host process.
 pub struct PluginHostState {

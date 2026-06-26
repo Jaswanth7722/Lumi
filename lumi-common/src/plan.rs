@@ -115,7 +115,10 @@ pub enum RecoveryStrategy {
     /// Skip this step and continue.
     SkipStep,
     /// Use an alternative tool for this step.
-    AlternativeTool { tool: String, input: serde_json::Value },
+    AlternativeTool {
+        tool: String,
+        input: serde_json::Value,
+    },
     /// Ask the user how to proceed.
     AskUser { message: String },
     /// Abort the entire plan.
@@ -152,7 +155,10 @@ impl ExecutionGraph {
 
         for step in &steps {
             for dep in &step.depends_on {
-                adjacency.entry(dep.clone()).or_default().push(step.id.clone());
+                adjacency
+                    .entry(dep.clone())
+                    .or_default()
+                    .push(step.id.clone());
                 *in_degree.entry(step.id.clone()).or_insert(0) += 1;
             }
         }
@@ -170,7 +176,9 @@ impl ExecutionGraph {
             .iter()
             .filter(|(_, degree)| **degree == 0)
             .filter(|(id, _)| {
-                self.steps.get(id.as_str()).map_or(false, |s| s.status == StepStatus::Pending)
+                self.steps
+                    .get(id.as_str())
+                    .map_or(false, |s| s.status == StepStatus::Pending)
             })
             .map(|(id, _)| id.clone())
             .collect()
@@ -192,7 +200,9 @@ impl ExecutionGraph {
 
     /// Check if all steps are completed.
     pub fn all_completed(&self) -> bool {
-        self.steps.values().all(|s| s.status == StepStatus::Completed)
+        self.steps
+            .values()
+            .all(|s| s.status == StepStatus::Completed)
     }
 
     /// Check if any steps have failed.
@@ -277,10 +287,7 @@ mod tests {
             let deserialized: PlanStatus = serde_json::from_value(json).unwrap();
             // We can't derive PartialEq on enum variants with different shapes
             // so we match on the debug string instead
-            assert_eq!(
-                format!("{status:?}"),
-                format!("{deserialized:?}")
-            );
+            assert_eq!(format!("{status:?}"), format!("{deserialized:?}"));
         }
     }
 }

@@ -118,21 +118,17 @@ impl TransportListener {
     pub fn local_path(&self) -> String {
         match self {
             #[cfg(unix)]
-            TransportListener::Unix(listener) => {
-                match listener.local_addr() {
-                    Ok(addr) => format!("{:?}", addr.as_pathname()),
-                    Err(_) => "unknown".into(),
-                }
-            }
+            TransportListener::Unix(listener) => match listener.local_addr() {
+                Ok(addr) => format!("{:?}", addr.as_pathname()),
+                Err(_) => "unknown".into(),
+            },
             #[cfg(windows)]
             TransportListener::NamedPipe(_) => "named-pipe".into(),
             #[cfg(feature = "tcp-fallback")]
-            TransportListener::Tcp(listener) => {
-                match listener.local_addr() {
-                    Ok(addr) => addr.to_string(),
-                    Err(_) => "unknown".into(),
-                }
-            }
+            TransportListener::Tcp(listener) => match listener.local_addr() {
+                Ok(addr) => addr.to_string(),
+                Err(_) => "unknown".into(),
+            },
         }
     }
 
@@ -168,8 +164,7 @@ pub async fn connect_to_peer(
     #[cfg(windows)]
     {
         let pipe_path = format!(r"\\.\pipe\lumi-{}", process_id);
-        let client = tokio::net::windows::named_pipe::ClientOptions::new()
-            .open(&pipe_path)?;
+        let client = tokio::net::windows::named_pipe::ClientOptions::new().open(&pipe_path)?;
         debug!("Connected to peer (named pipe): {}", pipe_path);
         Ok(Box::new(client))
     }

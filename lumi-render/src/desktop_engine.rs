@@ -31,7 +31,10 @@ impl DesktopEngine {
             bounds: (500.0, 500.0, 100.0, 150.0),
             hit_tester_config: HitTesterConfig::default(),
             mouse_passthrough: true,
-            mask_size: AlphaMaskSize { width: 256, height: 256 },
+            mask_size: AlphaMaskSize {
+                width: 256,
+                height: 256,
+            },
             window_created: false,
         }
     }
@@ -64,7 +67,10 @@ impl DesktopEngine {
                     self.spring.target.1 + offset_y,
                 );
             }
-            PositionTarget::RelativeToWindow { window_id: _, anchor } => {
+            PositionTarget::RelativeToWindow {
+                window_id: _,
+                anchor,
+            } => {
                 // In production, query window bounds and compute position
                 match anchor {
                     WindowAnchor::BottomLeft => {

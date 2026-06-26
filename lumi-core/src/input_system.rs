@@ -3,8 +3,8 @@
 //! Receives, classifies, and routes all user input directed at Lumi.
 
 use lumi_common::input::{
-    DragState, HotkeyAction, HotkeyBinding, InputEvent, InputEventType, InputSource, MouseButton, Point,
-    default_hotkey_bindings,
+    DragState, HotkeyAction, HotkeyBinding, InputEvent, InputEventType, InputSource, MouseButton,
+    Point, default_hotkey_bindings,
 };
 use lumi_common::position::PositionTarget;
 use lumi_common::state_machine::StateEvent;
@@ -52,11 +52,19 @@ impl InputSystem {
         }
     }
 
-    pub fn handle_click(&mut self, screen_x: i32, screen_y: i32, _button: MouseButton) -> Option<StateEvent> {
+    pub fn handle_click(
+        &mut self,
+        screen_x: i32,
+        screen_y: i32,
+        _button: MouseButton,
+    ) -> Option<StateEvent> {
         if !self.test_hit(screen_x, screen_y) {
             return None;
         }
-        self.last_click_position = Some(Point { x: screen_x as f32, y: screen_y as f32 });
+        self.last_click_position = Some(Point {
+            x: screen_x as f32,
+            y: screen_y as f32,
+        });
         Some(StateEvent::UserClick)
     }
 
@@ -65,7 +73,10 @@ impl InputSystem {
             return false;
         }
         let offset = (x - self.current_position.x, y - self.current_position.y);
-        self.drag_state = Some(DragState { offset, active: true });
+        self.drag_state = Some(DragState {
+            offset,
+            active: true,
+        });
         debug!("Drag started at ({}, {})", x, y);
         true
     }

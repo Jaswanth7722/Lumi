@@ -80,9 +80,9 @@ impl WakeWordEngine {
         }
 
         if self.cooldown_remaining_ms > 0 {
-            self.cooldown_remaining_ms = self.cooldown_remaining_ms.saturating_sub(
-                (samples.len() as u64 * 1000) / 16000,
-            );
+            self.cooldown_remaining_ms = self
+                .cooldown_remaining_ms
+                .saturating_sub((samples.len() as u64 * 1000) / 16000);
             return WakeWordResult::NotDetected;
         }
 

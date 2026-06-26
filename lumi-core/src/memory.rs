@@ -5,7 +5,7 @@
 
 use lumi_common::memory::{
     MemoryCandidate, MemoryEntry, MemoryQuery, MemoryQueryResult, MemorySource, MemoryType,
-    RetrieverConfig, RetentionConfig, RetentionPolicy, ScoredMemory, WriteMemoryRequest,
+    RetentionConfig, RetentionPolicy, RetrieverConfig, ScoredMemory, WriteMemoryRequest,
     WriteMemoryResult, composite_score, recency_score,
 };
 use std::collections::HashMap;
@@ -38,7 +38,10 @@ impl MemorySystem {
     pub async fn initialize(&mut self) {
         info!("Memory System initializing...");
         self.initialized = true;
-        info!("Memory System ready ({} memories loaded)", self.memories.len());
+        info!(
+            "Memory System ready ({} memories loaded)",
+            self.memories.len()
+        );
     }
 
     /// Write a new memory entry.
@@ -49,8 +52,10 @@ impl MemorySystem {
         let type_key = format!("{:?}", request.entry.memory_type).to_lowercase();
         if let Some(policy) = self.retention_config.policies.get(&type_key) {
             if request.entry.confidence < policy.min_confidence {
-                debug!("Memory rejected: confidence {} below threshold {} for type {}",
-                    request.entry.confidence, policy.min_confidence, type_key);
+                debug!(
+                    "Memory rejected: confidence {} below threshold {} for type {}",
+                    request.entry.confidence, policy.min_confidence, type_key
+                );
                 return WriteMemoryResult {
                     id,
                     stored: false,
@@ -77,7 +82,8 @@ impl MemorySystem {
         let query_lower = query.query_text.to_lowercase();
 
         // Simple keyword-based scoring (in production, use vector similarity)
-        let mut scored: Vec<ScoredMemory> = self.memories
+        let mut scored: Vec<ScoredMemory> = self
+            .memories
             .values()
             .filter(|m| {
                 // Apply type filter
@@ -98,7 +104,8 @@ impl MemorySystem {
                 // Simple keyword overlap score as a stand-in for embedding similarity
                 let content_lower = m.content.to_lowercase();
                 let query_words: Vec<&str> = query_lower.split_whitespace().collect();
-                let matches = query_words.iter()
+                let matches = query_words
+                    .iter()
                     .filter(|w| content_lower.contains(*w))
                     .count();
                 let similarity = if query_words.is_empty() {
@@ -325,9 +332,21 @@ mod tests {
         ];
 
         let candidates = system.extract_memories(&messages);
-        assert!(candidates.iter().any(|c| matches!(c.memory_type, MemoryType::Preference)));
-        assert!(candidates.iter().any(|c| matches!(c.memory_type, MemoryType::Project)));
-        assert!(candidates.iter().any(|c| matches!(c.memory_type, MemoryType::Goal)));
+        assert!(
+            candidates
+                .iter()
+                .any(|c| matches!(c.memory_type, MemoryType::Preference))
+        );
+        assert!(
+            candidates
+                .iter()
+                .any(|c| matches!(c.memory_type, MemoryType::Project))
+        );
+        assert!(
+            candidates
+                .iter()
+                .any(|c| matches!(c.memory_type, MemoryType::Goal))
+        );
     }
 
     #[test]

@@ -72,7 +72,7 @@ impl ConversationSystem {
             || lower.starts_with("delete")
             || lower.starts_with("install")
             || lower.contains("please")
-            && (lower.contains("create") || lower.contains("write") || lower.contains("find"))
+                && (lower.contains("create") || lower.contains("write") || lower.contains("find"))
         {
             return DetectedIntent::TaskRequest;
         }
@@ -124,19 +124,21 @@ impl ConversationSystem {
 
     /// Summarize older conversation history to free context budget.
     async fn summarize_history(&mut self) {
-        info!("Summarizing conversation history ({} turns)", self.history.len());
+        info!(
+            "Summarizing conversation history ({} turns)",
+            self.history.len()
+        );
 
         // Keep most recent 40%, summarize oldest 60%
         let keep_count = (self.history.len() as f32 * 0.4) as usize;
         let summarize_count = self.history.len() - keep_count;
 
-        let to_summarize: Vec<String> = self.history
+        let to_summarize: Vec<String> = self
+            .history
             .range(self.history.len() - summarize_count..)
-            .map(|m| {
-                match &m.content[0] {
-                    MessageContent::Text { text } => text.clone(),
-                    _ => String::new(),
-                }
+            .map(|m| match &m.content[0] {
+                MessageContent::Text { text } => text.clone(),
+                _ => String::new(),
             })
             .collect();
 
@@ -201,28 +203,49 @@ mod tests {
     #[test]
     fn test_intent_detection_task() {
         let system = ConversationSystem::new();
-        assert_eq!(system.detect_intent("Create a new React project"), DetectedIntent::TaskRequest);
-        assert_eq!(system.detect_intent("Build a dashboard UI"), DetectedIntent::TaskRequest);
+        assert_eq!(
+            system.detect_intent("Create a new React project"),
+            DetectedIntent::TaskRequest
+        );
+        assert_eq!(
+            system.detect_intent("Build a dashboard UI"),
+            DetectedIntent::TaskRequest
+        );
     }
 
     #[test]
     fn test_intent_detection_memory() {
         let system = ConversationSystem::new();
-        assert_eq!(system.detect_intent("Do you remember my name?"), DetectedIntent::MemoryQuery);
-        assert_eq!(system.detect_intent("What do you know about TypeScript?"), DetectedIntent::MemoryQuery);
+        assert_eq!(
+            system.detect_intent("Do you remember my name?"),
+            DetectedIntent::MemoryQuery
+        );
+        assert_eq!(
+            system.detect_intent("What do you know about TypeScript?"),
+            DetectedIntent::MemoryQuery
+        );
     }
 
     #[test]
     fn test_intent_detection_question() {
         let system = ConversationSystem::new();
-        assert_eq!(system.detect_intent("What's the weather?"), DetectedIntent::SimpleQuestion);
+        assert_eq!(
+            system.detect_intent("What's the weather?"),
+            DetectedIntent::SimpleQuestion
+        );
     }
 
     #[test]
     fn test_intent_detection_personal() {
         let system = ConversationSystem::new();
-        assert_eq!(system.detect_intent("I am a software engineer"), DetectedIntent::PersonalShare);
-        assert_eq!(system.detect_intent("I use VSCode for coding"), DetectedIntent::PersonalShare);
+        assert_eq!(
+            system.detect_intent("I am a software engineer"),
+            DetectedIntent::PersonalShare
+        );
+        assert_eq!(
+            system.detect_intent("I use VSCode for coding"),
+            DetectedIntent::PersonalShare
+        );
     }
 
     #[test]
@@ -240,6 +263,9 @@ mod tests {
     fn test_sentence_detection() {
         let mut system = ConversationSystem::new();
         assert_eq!(system.process_token("Hello"), None);
-        assert_eq!(system.process_token(" world."), Some("Hello world.".to_string()));
+        assert_eq!(
+            system.process_token(" world."),
+            Some("Hello world.".to_string())
+        );
     }
 }

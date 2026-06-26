@@ -64,24 +64,32 @@ impl MemoryStore {
         let now = chrono::Utc::now().timestamp_millis();
         let query_lower = request.query.query_text.to_lowercase();
 
-        let mut scored: Vec<_> = self.memories
+        let mut scored: Vec<_> = self
+            .memories
             .values()
             .filter(|m| {
                 if let Some(ref mem_type) = request.query.memory_type {
-                    if m.memory_type != *mem_type { return false; }
+                    if m.memory_type != *mem_type {
+                        return false;
+                    }
                 }
                 if let Some(ref tags) = request.query.tags {
-                    if !tags.iter().any(|t| m.tags.contains(t)) { return false; }
+                    if !tags.iter().any(|t| m.tags.contains(t)) {
+                        return false;
+                    }
                 }
                 if let Some(min_conf) = request.query.min_confidence {
-                    if m.confidence < min_conf { return false; }
+                    if m.confidence < min_conf {
+                        return false;
+                    }
                 }
                 true
             })
             .map(|m| {
                 let content_lower = m.content.to_lowercase();
                 let query_words: Vec<&str> = query_lower.split_whitespace().collect();
-                let matches = query_words.iter()
+                let matches = query_words
+                    .iter()
                     .filter(|w| content_lower.contains(*w))
                     .count();
                 let similarity = if query_words.is_empty() {
@@ -109,7 +117,8 @@ impl MemoryStore {
         scored.truncate(limit);
 
         MemoryQueryResult {
-            memories: scored.into_iter()
+            memories: scored
+                .into_iter()
                 .map(|(memory, score)| lumi_common::memory::ScoredMemory { memory, score })
                 .collect(),
             total_count: self.memories.len() as u64,
@@ -173,7 +182,10 @@ mod tests {
     fn test_write_and_query() {
         let mut store = MemoryStore::new();
         let entry = test_entry("User prefers dark mode");
-        store.write(WriteMemoryRequest { entry, generate_embedding: false });
+        store.write(WriteMemoryRequest {
+            entry,
+            generate_embedding: false,
+        });
 
         let result = store.query(QueryMemoryRequest {
             query: MemoryQuery {
@@ -195,7 +207,10 @@ mod tests {
         let mut store = MemoryStore::new();
         let entry = test_entry("Test");
         let id = entry.id.clone();
-        store.write(WriteMemoryRequest { entry, generate_embedding: false });
+        store.write(WriteMemoryRequest {
+            entry,
+            generate_embedding: false,
+        });
         assert!(store.delete(&id));
         assert_eq!(store.count(), 0);
     }
@@ -203,8 +218,14 @@ mod tests {
     #[test]
     fn test_purge() {
         let mut store = MemoryStore::new();
-        store.write(WriteMemoryRequest { entry: test_entry("A"), generate_embedding: false });
-        store.write(WriteMemoryRequest { entry: test_entry("B"), generate_embedding: false });
+        store.write(WriteMemoryRequest {
+            entry: test_entry("A"),
+            generate_embedding: false,
+        });
+        store.write(WriteMemoryRequest {
+            entry: test_entry("B"),
+            generate_embedding: false,
+        });
         assert_eq!(store.purge(), 2);
         assert_eq!(store.count(), 0);
     }

@@ -1,8 +1,8 @@
 //! # Privacy Model — Data Minimization and User Control (Chapter 24)
 
 use lumi_common::privacy::{
-    DataInventory, MemoryInventory, CacheInventory, VoiceDataStatus, ScreenDataStatus,
-    PIIAction, PIIDetector, PrivacyTier, PluginDataEntry,
+    CacheInventory, DataInventory, MemoryInventory, PIIAction, PIIDetector, PluginDataEntry,
+    PrivacyTier, ScreenDataStatus, VoiceDataStatus,
 };
 use std::collections::HashMap;
 use tracing::debug;
@@ -52,7 +52,11 @@ impl PrivacyManager {
         self.feature_toggles.insert(feature.to_string(), enabled);
         self.audit_events.push(PrivacyAuditEvent {
             timestamp: chrono::Utc::now().timestamp_millis(),
-            description: format!("Feature '{}' {}", feature, if enabled { "enabled" } else { "disabled" }),
+            description: format!(
+                "Feature '{}' {}",
+                feature,
+                if enabled { "enabled" } else { "disabled" }
+            ),
         });
     }
 

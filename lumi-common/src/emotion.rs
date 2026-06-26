@@ -3,10 +3,10 @@
 //! Defines the emotion state model, emotion transition configuration,
 //! sentiment analysis signals, and the AI state → emotion mapping.
 
-use serde::{Deserialize, Serialize};
 use crate::ai::AIState;
-use crate::character::CrystalColor;
 use crate::animation::EarPose;
+use crate::character::CrystalColor;
+use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------
 // Emotion State Model
@@ -74,18 +74,102 @@ pub struct EmotionTransitionConfig {
 /// Emotion transition configurations keyed by emotion.
 pub fn default_emotion_configs() -> Vec<(Emotion, EmotionTransitionConfig)> {
     vec![
-        (Emotion::Neutral, EmotionTransitionConfig { fade_in_ms: 300, fade_out_ms: 300, min_hold_ms: 0 }),
-        (Emotion::Curious, EmotionTransitionConfig { fade_in_ms: 300, fade_out_ms: 500, min_hold_ms: 1000 }),
-        (Emotion::Engaged, EmotionTransitionConfig { fade_in_ms: 200, fade_out_ms: 400, min_hold_ms: 800 }),
-        (Emotion::Thinking, EmotionTransitionConfig { fade_in_ms: 400, fade_out_ms: 600, min_hold_ms: 500 }),
-        (Emotion::Happy, EmotionTransitionConfig { fade_in_ms: 200, fade_out_ms: 800, min_hold_ms: 1500 }),
-        (Emotion::Concerned, EmotionTransitionConfig { fade_in_ms: 400, fade_out_ms: 700, min_hold_ms: 1200 }),
-        (Emotion::Focused, EmotionTransitionConfig { fade_in_ms: 200, fade_out_ms: 500, min_hold_ms: 2000 }),
-        (Emotion::Surprised, EmotionTransitionConfig { fade_in_ms: 80, fade_out_ms: 400, min_hold_ms: 600 }),
-        (Emotion::Apologetic, EmotionTransitionConfig { fade_in_ms: 600, fade_out_ms: 1200, min_hold_ms: 2000 }),
-        (Emotion::Calm, EmotionTransitionConfig { fade_in_ms: 400, fade_out_ms: 600, min_hold_ms: 1000 }),
-        (Emotion::Alert, EmotionTransitionConfig { fade_in_ms: 100, fade_out_ms: 600, min_hold_ms: 800 }),
-        (Emotion::Proud, EmotionTransitionConfig { fade_in_ms: 300, fade_out_ms: 1000, min_hold_ms: 2000 }),
+        (
+            Emotion::Neutral,
+            EmotionTransitionConfig {
+                fade_in_ms: 300,
+                fade_out_ms: 300,
+                min_hold_ms: 0,
+            },
+        ),
+        (
+            Emotion::Curious,
+            EmotionTransitionConfig {
+                fade_in_ms: 300,
+                fade_out_ms: 500,
+                min_hold_ms: 1000,
+            },
+        ),
+        (
+            Emotion::Engaged,
+            EmotionTransitionConfig {
+                fade_in_ms: 200,
+                fade_out_ms: 400,
+                min_hold_ms: 800,
+            },
+        ),
+        (
+            Emotion::Thinking,
+            EmotionTransitionConfig {
+                fade_in_ms: 400,
+                fade_out_ms: 600,
+                min_hold_ms: 500,
+            },
+        ),
+        (
+            Emotion::Happy,
+            EmotionTransitionConfig {
+                fade_in_ms: 200,
+                fade_out_ms: 800,
+                min_hold_ms: 1500,
+            },
+        ),
+        (
+            Emotion::Concerned,
+            EmotionTransitionConfig {
+                fade_in_ms: 400,
+                fade_out_ms: 700,
+                min_hold_ms: 1200,
+            },
+        ),
+        (
+            Emotion::Focused,
+            EmotionTransitionConfig {
+                fade_in_ms: 200,
+                fade_out_ms: 500,
+                min_hold_ms: 2000,
+            },
+        ),
+        (
+            Emotion::Surprised,
+            EmotionTransitionConfig {
+                fade_in_ms: 80,
+                fade_out_ms: 400,
+                min_hold_ms: 600,
+            },
+        ),
+        (
+            Emotion::Apologetic,
+            EmotionTransitionConfig {
+                fade_in_ms: 600,
+                fade_out_ms: 1200,
+                min_hold_ms: 2000,
+            },
+        ),
+        (
+            Emotion::Calm,
+            EmotionTransitionConfig {
+                fade_in_ms: 400,
+                fade_out_ms: 600,
+                min_hold_ms: 1000,
+            },
+        ),
+        (
+            Emotion::Alert,
+            EmotionTransitionConfig {
+                fade_in_ms: 100,
+                fade_out_ms: 600,
+                min_hold_ms: 800,
+            },
+        ),
+        (
+            Emotion::Proud,
+            EmotionTransitionConfig {
+                fade_in_ms: 300,
+                fade_out_ms: 1000,
+                min_hold_ms: 2000,
+            },
+        ),
     ]
 }
 
@@ -153,70 +237,100 @@ pub fn emotion_mapping_for_ai_state(ai_state: &AIState) -> EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Thinking,
             crystal_color: CrystalColor::BlueDefault,
-            ear_pose: EarPose { forward_back: 0.3, up_down: 0.5 },
+            ear_pose: EarPose {
+                forward_back: 0.3,
+                up_down: 0.5,
+            },
             body_posture: BodyPosture::HeadTilt,
         },
         AIState::Planning => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Focused,
             crystal_color: CrystalColor::BlueDefault,
-            ear_pose: EarPose { forward_back: 0.5, up_down: 0.6 },
+            ear_pose: EarPose {
+                forward_back: 0.5,
+                up_down: 0.6,
+            },
             body_posture: BodyPosture::Upright,
         },
         AIState::ExecutingTool => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Focused,
             crystal_color: CrystalColor::BlueDefault,
-            ear_pose: EarPose { forward_back: 0.5, up_down: 0.6 },
+            ear_pose: EarPose {
+                forward_back: 0.5,
+                up_down: 0.6,
+            },
             body_posture: BodyPosture::LeaningForward,
         },
         AIState::Listening | AIState::ReceivingInput => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Engaged,
             crystal_color: CrystalColor::BlueDefault,
-            ear_pose: EarPose { forward_back: 1.0, up_down: 0.8 },
+            ear_pose: EarPose {
+                forward_back: 1.0,
+                up_down: 0.8,
+            },
             body_posture: BodyPosture::Attentive,
         },
         AIState::Speaking => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Engaged,
             crystal_color: CrystalColor::BlueDefault,
-            ear_pose: EarPose { forward_back: 0.3, up_down: 0.3 },
+            ear_pose: EarPose {
+                forward_back: 0.3,
+                up_down: 0.3,
+            },
             body_posture: BodyPosture::Natural,
         },
         AIState::Success => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Happy,
             crystal_color: CrystalColor::GreenSuccess,
-            ear_pose: EarPose { forward_back: 0.6, up_down: 1.0 },
+            ear_pose: EarPose {
+                forward_back: 0.6,
+                up_down: 1.0,
+            },
             body_posture: BodyPosture::Bounce,
         },
         AIState::Error => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Apologetic,
             crystal_color: CrystalColor::RedError,
-            ear_pose: EarPose { forward_back: -0.5, up_down: -0.3 },
+            ear_pose: EarPose {
+                forward_back: -0.5,
+                up_down: -0.3,
+            },
             body_posture: BodyPosture::Droop,
         },
         AIState::RetrievingMemory => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Curious,
             crystal_color: CrystalColor::PurpleMemory,
-            ear_pose: EarPose { forward_back: 0.0, up_down: 0.0 },
+            ear_pose: EarPose {
+                forward_back: 0.0,
+                up_down: 0.0,
+            },
             body_posture: BodyPosture::HeadTilt,
         },
         AIState::AwaitingConfirmation => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Curious,
             crystal_color: CrystalColor::BlueDefault,
-            ear_pose: EarPose { forward_back: 0.7, up_down: 0.4 },
+            ear_pose: EarPose {
+                forward_back: 0.7,
+                up_down: 0.4,
+            },
             body_posture: BodyPosture::Attentive,
         },
         AIState::GeneratingResponse => EmotionMapping {
             ai_state: ai_state.clone(),
             primary_emotion: Emotion::Thinking,
             crystal_color: CrystalColor::BlueDefault,
-            ear_pose: EarPose { forward_back: 0.3, up_down: 0.5 },
+            ear_pose: EarPose {
+                forward_back: 0.3,
+                up_down: 0.5,
+            },
             body_posture: BodyPosture::HeadTilt,
         },
     }

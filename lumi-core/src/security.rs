@@ -1,7 +1,8 @@
 //! # Security Model — Trust Boundaries and Secret Management (Chapter 23)
 
 use lumi_common::security::{
-    ApprovalAction, ApprovalCondition, ApprovalGate, ApprovalRule, SecretError, SecretStore, ToolPattern,
+    ApprovalAction, ApprovalCondition, ApprovalGate, ApprovalRule, SecretError, SecretStore,
+    ToolPattern,
 };
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -22,19 +23,28 @@ impl MemorySecretStore {
 
 impl SecretStore for MemorySecretStore {
     fn set(&self, key: &str, value: &str) -> Result<(), SecretError> {
-        let mut map = self.secrets.lock().map_err(|e| SecretError::StorageError(e.to_string()))?;
+        let mut map = self
+            .secrets
+            .lock()
+            .map_err(|e| SecretError::StorageError(e.to_string()))?;
         map.insert(key.to_string(), value.to_string());
         debug!("Secret stored: {}", key);
         Ok(())
     }
 
     fn get(&self, key: &str) -> Result<Option<String>, SecretError> {
-        let map = self.secrets.lock().map_err(|e| SecretError::StorageError(e.to_string()))?;
+        let map = self
+            .secrets
+            .lock()
+            .map_err(|e| SecretError::StorageError(e.to_string()))?;
         Ok(map.get(key).cloned())
     }
 
     fn delete(&self, key: &str) -> Result<(), SecretError> {
-        let mut map = self.secrets.lock().map_err(|e| SecretError::StorageError(e.to_string()))?;
+        let mut map = self
+            .secrets
+            .lock()
+            .map_err(|e| SecretError::StorageError(e.to_string()))?;
         map.remove(key);
         debug!("Secret deleted: {}", key);
         Ok(())

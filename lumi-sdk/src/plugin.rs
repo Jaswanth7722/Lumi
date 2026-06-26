@@ -2,8 +2,8 @@
 //!
 //! Defines the plugin manifest structure and builder for the Lumi SDK.
 
-use std::collections::HashMap;
 use lumi_common::tool::{Capability, ToolDefinition};
+use std::collections::HashMap;
 
 /// A plugin manifest describing a Lumi plugin's metadata and capabilities.
 #[derive(Debug, Clone)]
