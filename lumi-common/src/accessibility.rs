@@ -88,21 +88,11 @@ impl Default for CognitiveAccessibility {
 }
 
 /// Complete accessibility configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AccessibilityConfig {
     pub visual: VisualAccessibility,
     pub motor: MotorAccessibility,
     pub cognitive: CognitiveAccessibility,
-}
-
-impl Default for AccessibilityConfig {
-    fn default() -> Self {
-        Self {
-            visual: VisualAccessibility::default(),
-            motor: MotorAccessibility::default(),
-            cognitive: CognitiveAccessibility::default(),
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 //! `ErrorEventEmitter` is `Send + Sync` and can be shared across threads.
 
 use crate::error_code::ErrorCode;
-use crate::recovery::{RecoveryOutcome, RecoveryStrategy};
+use crate::recovery::RecoveryOutcome;
 use crate::report::ErrorReport;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

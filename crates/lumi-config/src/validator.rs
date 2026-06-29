@@ -733,11 +733,9 @@ impl Validate for IPCConfig {
 
 impl Validate for SecurityConfig {
     fn validate(&self) -> Vec<ValidationError> {
-        let mut errors = Vec::new();
-
         // No specific field validations needed for SecurityConfig beyond
         // what's enforced by its Option type and serde skip_serializing
-        errors
+        Vec::new()
     }
 }
 

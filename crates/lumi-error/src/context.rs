@@ -4,31 +4,31 @@
 //! for every error without requiring manual instrumentation at call sites.
 
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::time::SystemTime;
-use uuid::Uuid;
 
 /// Source code location where an error was created or propagated.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SourceLocation {
     /// Source file name.
-    pub file: &'static str,
+    pub file: String,
     /// Line number.
     pub line: u32,
     /// Column number.
     pub column: u32,
     /// Function name.
-    pub function: &'static str,
+    pub function: String,
 }
 
 impl SourceLocation {
     /// Create a source location at compile time.
-    pub const fn from_parts(file: &'static str, line: u32, column: u32) -> Self {
+    pub fn from_parts(file: &str, line: u32, column: u32) -> Self {
         Self {
-            file,
+            file: file.to_string(),
             line,
             column,
-            function: "",
+            function: String::new(),
         }
     }
 }
@@ -40,7 +40,7 @@ impl fmt::Display for SourceLocation {
 }
 
 /// Thread information at the time of error creation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ThreadInfo {
     /// Thread ID (OS-level).
     pub id: u64,
@@ -63,7 +63,7 @@ impl ThreadInfo {
 }
 
 /// Process-level information.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProcessInfo {
     /// Process ID.
     pub pid: u32,
@@ -82,7 +82,7 @@ impl ProcessInfo {
 }
 
 /// Bounded causal chain (max depth = 16) to prevent allocation runaway.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CauseChain {
     /// Ordered list of error summaries, newest first.
     entries: Vec<CauseEntry>,
@@ -91,7 +91,7 @@ pub struct CauseChain {
 }
 
 /// A single entry in the causal chain.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CauseEntry {
     /// Human-readable error description.
     pub message: String,
@@ -157,7 +157,7 @@ impl fmt::Display for CauseChain {
 }
 
 /// Full error context captured at the error creation site.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ErrorContext {
     /// Source code location.
     pub location: SourceLocation,

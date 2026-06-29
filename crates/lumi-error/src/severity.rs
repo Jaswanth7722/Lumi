@@ -2,8 +2,10 @@
 //!
 //! Typed severity enum with ordering, recovery guidance, and tracing interop.
 
+use serde::{Deserialize, Serialize};
+
 /// Error severity in ascending order.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum Severity {
     /// Trace-level diagnostic (most verbose).
     Trace = 0,

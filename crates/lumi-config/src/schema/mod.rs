@@ -142,34 +142,6 @@ impl LumiConfig {
         Self::CURRENT_SCHEMA_VERSION
     }
 
-    /// Create a configuration with all default values.
-    pub fn default() -> Self {
-        Self {
-            schema_version: Self::CURRENT_SCHEMA_VERSION,
-            general: GeneralConfig::default(),
-            runtime: RuntimeConfig::default(),
-            character: CharacterConfig::default(),
-            ai: AIConfig::default(),
-            voice: VoiceConfig::default(),
-            memory: MemoryConfig::default(),
-            rendering: RenderingConfig::default(),
-            physics: PhysicsConfig::default(),
-            animation: AnimationConfig::default(),
-            workspace: WorkspaceConfig::default(),
-            plugin: PluginConfig::default(),
-            ipc: IPCConfig::default(),
-            storage: StorageConfig::default(),
-            security: SecurityConfig::default(),
-            privacy: PrivacyConfig::default(),
-            performance: PerformanceConfig::default(),
-            accessibility: AccessibilityConfig::default(),
-            logging: LoggingConfig::default(),
-            update: UpdateConfig::default(),
-            diagnostics: DiagnosticsConfig::default(),
-            feature_flags: FeatureFlags::default(),
-        }
-    }
-
     /// Load configuration from a TOML string, merging with defaults.
     pub fn from_toml(toml_str: &str) -> Result<Self, toml::de::Error> {
         toml::from_str(toml_str)
@@ -199,6 +171,29 @@ impl LumiConfig {
 
 impl Default for LumiConfig {
     fn default() -> Self {
-        Self::default()
+        Self {
+            schema_version: Self::CURRENT_SCHEMA_VERSION,
+            general: GeneralConfig::default(),
+            runtime: RuntimeConfig::default(),
+            character: CharacterConfig::default(),
+            ai: AIConfig::default(),
+            voice: VoiceConfig::default(),
+            memory: MemoryConfig::default(),
+            rendering: RenderingConfig::default(),
+            physics: PhysicsConfig::default(),
+            animation: AnimationConfig::default(),
+            workspace: WorkspaceConfig::default(),
+            plugin: PluginConfig::default(),
+            ipc: IPCConfig::default(),
+            storage: StorageConfig::default(),
+            security: SecurityConfig::default(),
+            privacy: PrivacyConfig::default(),
+            performance: PerformanceConfig::default(),
+            accessibility: AccessibilityConfig::default(),
+            logging: LoggingConfig::default(),
+            update: UpdateConfig::default(),
+            diagnostics: DiagnosticsConfig::default(),
+            feature_flags: FeatureFlags::default(),
+        }
     }
 }

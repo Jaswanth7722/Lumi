@@ -6,10 +6,11 @@
 use crate::category::ErrorCategory;
 use crate::recovery::RecoveryStrategy;
 use crate::severity::Severity;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// A stable, typed error code.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ErrorCode(u32);
 
 impl ErrorCode {
@@ -43,7 +44,7 @@ impl From<u32> for ErrorCode {
 }
 
 /// A registered entry in the error code registry.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ErrorCodeEntry {
     /// The error code.
     pub code: ErrorCode,

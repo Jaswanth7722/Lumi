@@ -3,10 +3,11 @@
 //! Typed, structured error categories for every subsystem.
 //! Each variant carries typed metadata — not free-form strings.
 
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
 /// Error category with typed metadata for each subsystem.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ErrorCategory {
     /// Core runtime errors.
     Runtime,
@@ -170,7 +171,7 @@ impl Default for ErrorCategory {
 // ---------------------------------------------------------------------------
 
 /// Render pass identifier.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum RenderPass {
     /// Main character rendering.
     Character,
@@ -185,7 +186,7 @@ pub enum RenderPass {
 }
 
 /// Memory store hint.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MemoryStoreHint {
     /// Long-term memory store.
     LongTerm,
@@ -198,7 +199,7 @@ pub enum MemoryStoreHint {
 }
 
 /// Voice processing stage.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VoiceStage {
     /// Wake word detection.
     WakeWord,
@@ -213,7 +214,7 @@ pub enum VoiceStage {
 }
 
 /// Security violation type.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SecurityViolation {
     /// Authentication failure.
     Authentication,
@@ -232,7 +233,7 @@ pub enum SecurityViolation {
 }
 
 /// Filesystem operation type.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FilesystemOp {
     /// File read.
     Read,

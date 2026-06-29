@@ -75,6 +75,8 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+// serde derive macros are available through Cargo.toml dependency (features = ["derive"])
+
 pub mod category;
 pub mod config;
 pub mod context;

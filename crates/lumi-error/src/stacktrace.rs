@@ -2,10 +2,11 @@
 //!
 //! Stack trace with symbol resolution, demangling, and frame filtering.
 
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// A single stack frame.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StackFrame {
     /// Function name (demangled).
     pub function: String,
@@ -20,7 +21,7 @@ pub struct StackFrame {
 }
 
 /// A captured stack trace.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StackTrace {
     /// Stack frames (outermost first).
     pub frames: Vec<StackFrame>,

@@ -10,6 +10,7 @@ use crate::schema::LumiConfig;
 /// Migrations run in version order and are chained automatically.
 pub trait Migration: Send + Sync {
     /// Source schema version.
+    #[allow(clippy::wrong_self_convention)]
     fn from_version(&self) -> u32;
     /// Target schema version.
     fn to_version(&self) -> u32;

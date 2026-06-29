@@ -147,7 +147,7 @@ impl ErrorMetrics {
                 self.errors_by_severity[5].load(Ordering::Relaxed),
                 self.errors_by_severity[6].load(Ordering::Relaxed),
             ],
-            errors_by_category,
+            errors_by_category: by_category,
             recovery_attempts: self.recovery_attempts.load(Ordering::Relaxed),
             recovery_successes: self.recovery_successes.load(Ordering::Relaxed),
             recovery_failures: self.recovery_failures.load(Ordering::Relaxed),

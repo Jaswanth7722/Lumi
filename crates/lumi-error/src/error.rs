@@ -7,13 +7,11 @@
 use crate::category::ErrorCategory;
 use crate::context::ErrorContext;
 use crate::error_code::ErrorCode;
-use crate::recovery::RecoveryHint;
 use crate::severity::Severity;
 use std::fmt;
-use std::sync::Arc;
 
 /// A user-facing message (sanitized, safe to display in UI).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserFacingMessage(pub String);
 
 impl UserFacingMessage {
@@ -29,7 +27,7 @@ impl fmt::Display for UserFacingMessage {
 }
 
 /// A diagnostic message (full detail, for logs and crash reports only).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiagnosticMessage(pub String);
 
 impl DiagnosticMessage {
@@ -45,7 +43,7 @@ impl fmt::Display for DiagnosticMessage {
 }
 
 /// A recovery hint attached to an error.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RecoveryHint {
     /// No specific hint.
     None,
@@ -58,12 +56,6 @@ pub enum RecoveryHint {
 impl Default for RecoveryHint {
     fn default() -> Self {
         Self::None
-    }
-}
-
-cfg_if::cfg_if! {
-    if #[cfg(feature = "serde")] {
-        use serde::{Serialize, Deserialize};
     }
 }
 
@@ -89,7 +81,7 @@ cfg_if::cfg_if! {
 ///         .with_recovery(RecoveryStrategy::Retry(RetryPolicy::exponential_default())))
 /// }
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LumiError {
     /// Error category from the taxonomy.
     category: ErrorCategory,
@@ -106,6 +98,7 @@ pub struct LumiError {
     /// Diagnostic message (full detail, for logs).
     diagnostic_message: DiagnosticMessage,
     /// Source error in the causal chain.
+    #[serde(skip)]
     source: Option<Box<dyn std::error::Error + Send + Sync + 'static>>,
 }
 
@@ -213,9 +206,23 @@ impl std::error::Error for LumiError {
     }
 }
 
-impl From<LumiError> for Box<dyn std::error::Error + Send + Sync + 'static> {
-    fn from(err: LumiError) -> Self {
-        Box::new(err)
+// Note: Blanket From impl in std provides:
+// impl<T: Error + Send + Sync + 'static> From<T> for Box<dyn Error + Send + Sync + 'static>
+// So we don't need a manual From<LumiError> for Box<dyn ...> impl.
+
+// Manual Clone impl: source field (Box<dyn Error>) doesn't implement Clone
+impl Clone for LumiError {
+    fn clone(&self) -> Self {
+        Self {
+            category: self.category.clone(),
+            severity: self.severity,
+            code: self.code,
+            context: self.context.clone(),
+            recovery: self.recovery.clone(),
+            user_message: self.user_message.clone(),
+            diagnostic_message: self.diagnostic_message.clone(),
+            source: None, // Source is not cloneable
+        }
     }
 }
 

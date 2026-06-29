@@ -178,7 +178,7 @@ impl ExecutionGraph {
             .filter(|(id, _)| {
                 self.steps
                     .get(id.as_str())
-                    .map_or(false, |s| s.status == StepStatus::Pending)
+                    .is_some_and(|s| s.status == StepStatus::Pending)
             })
             .map(|(id, _)| id.clone())
             .collect()

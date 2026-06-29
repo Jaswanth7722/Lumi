@@ -20,6 +20,7 @@ use crate::error::ConfigError;
 use crate::event::{ConfigLoaded, ConfigReloadFailed, ConfigReloaded, EventBus};
 use arc_swap::ArcSwap;
 use lumi_config::LumiConfig;
+use lumi_config::{CloudProvider, InferenceMode};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tracing::{debug, info, warn};
@@ -170,11 +171,15 @@ impl ConfigLoader {
                 "GENERAL_UPDATE_CHANNEL" => config.general.update_channel = value,
 
                 // AI
-                "AI_INFERENCE_MODE" => config.ai.inference_mode = value,
-                "AI_CLOUD_PROVIDER" => config.ai.cloud_provider = value,
+                "AI_INFERENCE_MODE" => {
+                    config.ai.inference_mode = Self::parse_inference_mode(&key, &value, &mut errors)
+                }
+                "AI_CLOUD_PROVIDER" => {
+                    config.ai.cloud_provider = Self::parse_cloud_provider(&key, &value, &mut errors)
+                }
                 "AI_LOCAL_MODEL" => config.ai.local_model = value,
                 "AI_TEMPERATURE" => {
-                    config.ai.temperature = Self::parse_f64(&key, &value, &mut errors)
+                    config.ai.temperature = Self::parse_f32(&key, &value, &mut errors)
                 }
                 "AI_MAX_RESPONSE_TOKENS" => {
                     config.ai.max_response_tokens = Self::parse_u32(&key, &value, &mut errors)
@@ -227,16 +232,56 @@ impl ConfigLoader {
         }
     }
 
-    /// Parse a f64 from an environment variable.
-    fn parse_f64(key: &str, value: &str, errors: &mut Vec<ConfigError>) -> f64 {
-        value.parse::<f64>().unwrap_or_else(|e| {
+    /// Parse an f32 from an environment variable.
+    fn parse_f32(key: &str, value: &str, errors: &mut Vec<ConfigError>) -> f32 {
+        value.parse::<f32>().unwrap_or_else(|e| {
             errors.push(ConfigError::EnvVarError {
                 var: key.to_string(),
                 value: value.to_string(),
-                message: format!("Cannot parse as f64: {e}"),
+                message: format!("Cannot parse as f32: {e}"),
             });
             0.0
         })
+    }
+
+    /// Parse an InferenceMode from an environment variable.
+    /// Accepted values (case-insensitive): always_local, always_cloud, prefer_local, prefer_cloud.
+    fn parse_inference_mode(key: &str, value: &str, errors: &mut Vec<ConfigError>) -> InferenceMode {
+        match value.to_lowercase().as_str() {
+            "always_local" | "always-local" => InferenceMode::AlwaysLocal,
+            "always_cloud" | "always-cloud" => InferenceMode::AlwaysCloud,
+            "prefer_local" | "prefer-local" => InferenceMode::PreferLocal,
+            "prefer_cloud" | "prefer-cloud" => InferenceMode::PreferCloud,
+            _ => {
+                errors.push(ConfigError::EnvVarError {
+                    var: key.to_string(),
+                    value: value.to_string(),
+                    message: format!(
+                        "Cannot parse '{value}' as InferenceMode. Expected: always_local, always_cloud, prefer_local, prefer_cloud"
+                    ),
+                });
+                InferenceMode::default()
+            }
+        }
+    }
+
+    /// Parse a CloudProvider from an environment variable.
+    /// Accepted values (case-insensitive): anthropic, openai_compatible.
+    fn parse_cloud_provider(key: &str, value: &str, errors: &mut Vec<ConfigError>) -> CloudProvider {
+        match value.to_lowercase().as_str() {
+            "anthropic" => CloudProvider::Anthropic,
+            "openai_compatible" | "openai-compatible" => CloudProvider::OpenAICompatible,
+            _ => {
+                errors.push(ConfigError::EnvVarError {
+                    var: key.to_string(),
+                    value: value.to_string(),
+                    message: format!(
+                        "Cannot parse '{value}' as CloudProvider. Expected: anthropic, openai_compatible"
+                    ),
+                });
+                CloudProvider::default()
+            }
+        }
     }
 
     /// Parse a u32 from an environment variable.
@@ -290,7 +335,7 @@ impl ConfigLoader {
         }
 
         // Cross-field constraints
-        if config.ai.inference_mode == "always_local" && config.ai.local_model.is_empty() {
+        if config.ai.inference_mode == InferenceMode::AlwaysLocal && config.ai.local_model.is_empty() {
             errors.push(ConfigValidationError {
                 field: "ai.local_model".into(),
                 message: "local_model must be set when inference_mode is 'always_local'".into(),
@@ -333,7 +378,7 @@ impl ConfigLoader {
         base.character.position_y = overlay.character.position_y;
 
         // AI
-        if overlay.ai.inference_mode != "prefer_local" {
+        if overlay.ai.inference_mode != InferenceMode::PreferLocal {
             base.ai.inference_mode = overlay.ai.inference_mode;
         }
         base.ai.temperature = overlay.ai.temperature;

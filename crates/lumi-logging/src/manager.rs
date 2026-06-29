@@ -130,16 +130,15 @@ impl LogManager {
             }),
         };
 
+        // Collect the constructed sinks and pass them to the pipeline worker
+        let sink_handles: Vec<SinkHandle> = sinks.iter().map(|e| e.value().clone()).collect();
+        let worker = worker.with_sinks(sink_handles);
+
         // Start pipeline worker
         worker.run();
 
         // Emit LoggingInitialized event
-        let sink_names: Vec<String> = manager
-            .inner
-            .sinks
-            .iter()
-            .map(|e| e.key().clone())
-            .collect();
+        let sink_names: Vec<String> = sinks.iter().map(|e| e.key().clone()).collect();
         event_bus
             .publish(LoggingInitialized {
                 sinks: sink_names,

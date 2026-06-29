@@ -4,7 +4,6 @@
 //! process isolation boundaries, and audit event types.
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 // ---------------------------------------------------------------------------
 // Threat Model

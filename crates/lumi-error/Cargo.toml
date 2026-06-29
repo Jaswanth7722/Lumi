@@ -5,10 +5,9 @@ edition.workspace = true
 description = "Centralized error handling, recovery, and crash reporting for the Lumi platform"
 
 [features]
-default = ["metrics", "serde", "async"]
+default = ["metrics", "async"]
 backtrace = ["dep:backtrace"]
 metrics = []
-serde = ["dep:serde", "dep:serde_json"]
 async = ["dep:tokio"]
 testing = []
 
@@ -23,9 +22,9 @@ thiserror = "1"
 # Async
 tokio = { version = "1", features = ["full"], optional = true }
 
-# Serialization
-serde = { version = "1", features = ["derive"], optional = true }
-serde_json = { version = "1", optional = true }
+# Serialization (non-optional — required by all reporting/event/diagnostics)
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
 
 # Concurrency
 parking_lot = "0.12"
@@ -44,6 +43,8 @@ num_cpus = "1"
 tracing = "0.1"
 regex = "1"
 indexmap = "2"
+cfg-if = "1"
+rand = "0.8"
 
 [dev-dependencies]
 tokio-test = "0.4"

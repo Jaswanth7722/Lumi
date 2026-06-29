@@ -228,9 +228,7 @@ impl ConfigLoader {
         // Stage 6: Validation
         self.stage = LoaderStage::Validating;
         debug!("Stage 6: Validating configuration");
-        if let Err(e) = validate_config(&config) {
-            return Err(e);
-        }
+        validate_config(&config)?;
 
         // Stage 7: Complete
         self.stage = LoaderStage::Complete;

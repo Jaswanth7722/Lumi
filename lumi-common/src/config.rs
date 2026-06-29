@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 // ---------------------------------------------------------------------------
 
 /// Root configuration structure matching config.toml.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct LumiConfig {
     pub general: GeneralConfig,
     pub character: CharacterConfig,
@@ -22,23 +22,6 @@ pub struct LumiConfig {
     pub performance: PerformanceConfig,
     pub behavior: BehaviorConfig,
     pub hotkeys: HotkeysConfig,
-}
-
-impl Default for LumiConfig {
-    fn default() -> Self {
-        Self {
-            general: GeneralConfig::default(),
-            character: CharacterConfig::default(),
-            ai: AIConfig::default(),
-            voice: VoiceConfig::default(),
-            memory: MemoryConfig::default(),
-            privacy: PrivacyConfig::default(),
-            desktop_awareness: DesktopAwarenessConfig::default(),
-            performance: PerformanceConfig::default(),
-            behavior: BehaviorConfig::default(),
-            hotkeys: HotkeysConfig::default(),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

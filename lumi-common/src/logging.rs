@@ -156,6 +156,12 @@ impl TelemetryConfig {
     }
 }
 
+impl Default for TelemetryConfig {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

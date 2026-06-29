@@ -9,7 +9,6 @@
 
 use crate::error::LumiError;
 use crate::report::{ErrorReport, ReportFormat};
-use serde_json;
 
 /// Output mode determines which fields are included.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -143,11 +142,11 @@ impl ErrorFormatter {
 
                 let recovery = error.recovery();
                 match recovery {
-                    crate::recovery::RecoveryHint::None => {}
-                    crate::recovery::RecoveryHint::Suggestion(s) => {
+                    crate::error::RecoveryHint::None => {}
+                    crate::error::RecoveryHint::Suggestion(s) => {
                         output.push_str(&format!("\nRecovery suggestion: {}", s));
                     }
-                    crate::recovery::RecoveryHint::Strategy(s) => {
+                    crate::error::RecoveryHint::Strategy(s) => {
                         output.push_str(&format!("\nRecovery strategy: {:?}", s));
                     }
                 }

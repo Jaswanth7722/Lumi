@@ -187,22 +187,17 @@ pub struct TokenUsage {
 // ---------------------------------------------------------------------------
 
 /// The preferred inference execution mode.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum InferenceMode {
     /// Always use local inference (privacy mode).
     AlwaysLocal,
     /// Always use cloud inference.
     AlwaysCloud,
     /// Prefer local inference, fall back to cloud.
+    #[default]
     PreferLocal,
     /// Prefer cloud inference, fall back to local.
     PreferCloud,
-}
-
-impl Default for InferenceMode {
-    fn default() -> Self {
-        Self::PreferLocal
-    }
 }
 
 // ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 
 use crate::error::LumiError;
 use crate::severity::Severity;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -49,11 +50,11 @@ pub enum DegradedMode {
 }
 
 /// A capability that may be lost during degradation.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Capability(pub String);
 
 /// A recovery strategy that the system can apply.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RecoveryStrategy {
     /// Ignore the error completely.
     Ignore,
@@ -81,6 +82,7 @@ pub enum RecoveryStrategy {
     /// Use a fallback handler.
     Fallback {
         /// The fallback handler.
+        #[serde(skip)]
         handler: Arc<dyn FallbackHandler>,
     },
     /// Graceful degradation mode.
@@ -108,7 +110,7 @@ impl Default for RecoveryStrategy {
 }
 
 /// Outcome of a recovery attempt.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RecoveryOutcome {
     /// The system recovered successfully.
     Recovered,

@@ -36,7 +36,7 @@ struct ConfigManagerInner {
     /// Override manager for runtime overrides.
     overrides: OverrideManager,
     /// Migration engine for schema upgrades.
-    migrations: MigrationEngine,
+    _migrations: MigrationEngine,
     /// Event publisher for config lifecycle events.
     event_publisher: Option<Arc<dyn ConfigEventPublisher>>,
     /// The path the config was loaded from.
@@ -85,8 +85,7 @@ impl ConfigManager {
             inner: Arc::new(ConfigManagerInner {
                 cache,
                 overrides,
-                #[allow(dead_code)]
-                migrations: MigrationEngine::new(),
+                _migrations: MigrationEngine::new(),
                 event_publisher,
                 config_path: None,
             }),
@@ -129,7 +128,7 @@ impl ConfigManager {
         let config = self.current();
         let toml_str = config.to_toml().map_err(|e| ConfigError::WriteFailed {
             path: path.clone(),
-            source: std::io::Error::new(std::io::ErrorKind::Other, e.to_string()),
+            source: std::io::Error::other(e.to_string()),
         })?;
 
         // Create backup if file exists
@@ -152,7 +151,7 @@ impl ConfigManager {
         serde_json::to_string_pretty(self.current().as_ref()).map_err(|e| {
             ConfigError::WriteFailed {
                 path: PathBuf::from("<json>"),
-                source: std::io::Error::new(std::io::ErrorKind::Other, e.to_string()),
+                source: std::io::Error::other(e.to_string()),
             }
         })
     }

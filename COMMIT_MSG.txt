@@ -1,0 +1,28 @@
+docs(core): initialize master architecture blueprint and system topology in README
+
+- Add comprehensive 50-component architecture grid across 10 system layers
+- Mark 8 foundation components as fully operational with ✓ status
+- Include production status table with per-system completion metrics
+- Add workspace directory tree, crate dependency graph, and quick-start guide
+- Document key technology decisions (Rust, TypeScript, zero-Python policy)
+
+build(workspace): optimize root Cargo.toml workspace dependencies and crate modularization
+
+- Streamline workspace member declarations for clean inspection tool parsing
+
+fix(lumi-error): resolve serde derive chain across all error types
+
+- Make serde/serde_json mandatory dependencies (remove optional feature flag)
+- Add Serialize/Deserialize derives to: RenderPass, MemoryStoreHint, VoiceStage,
+  SecurityViolation, FilesystemOp, StackFrame, ErrorCodeEntry, RecoveryOutcome
+- Add #[serde(skip)] on non-serializable fields (Box<dyn Error>, Arc<dyn FallbackHandler>)
+- Change SourceLocation fields from &'static str to String for Deserialize support
+- Remove conflicting From<LumiError> for Box<dyn Error + Send + Sync> impl
+- Manually implement Clone for LumiError (source field is non-cloneable)
+- Remove circular RecoveryHint import from error.rs to recovery module
+- Fix field init shorthand in metrics.rs (errors_by_category -> by_category)
+- Add manual Debug impl for RetryPolicy (dyn Fn is not Debug)
+- Add rand as regular dependency for retry jitter computation
+- Remove unused imports: uuid::Uuid, serde_json, std::sync::Arc, RecoveryStrategy
+- Remove redundant extern crate serde directive from lib.rs
+- Remove unused cfg-if dependency

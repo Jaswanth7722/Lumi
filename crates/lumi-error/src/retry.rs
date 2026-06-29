@@ -111,7 +111,7 @@ pub struct RetryAttempt {
 }
 
 /// Retry policy configuration.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct RetryPolicy {
     /// Maximum number of retry attempts.
     pub max_attempts: std::num::NonZeroU32,
@@ -125,6 +125,19 @@ pub struct RetryPolicy {
     pub retry_on: RetryCondition,
     /// Callback on each retry.
     pub on_retry: Option<Arc<dyn Fn(RetryAttempt) + Send + Sync>>,
+}
+
+impl std::fmt::Debug for RetryPolicy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RetryPolicy")
+            .field("max_attempts", &self.max_attempts)
+            .field("strategy", &self.strategy)
+            .field("timeout", &self.timeout)
+            .field("jitter", &self.jitter)
+            .field("retry_on", &self.retry_on)
+            .field("on_retry", &self.on_retry.as_ref().map(|_| "<fn>"))
+            .finish()
+    }
 }
 
 impl RetryPolicy {

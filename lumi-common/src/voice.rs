@@ -86,13 +86,14 @@ impl Default for VADConfig {
 // ---------------------------------------------------------------------------
 
 /// Whisper model sizes for local STT.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum WhisperModelSize {
     /// 39MB, fastest, English-only available.
     Tiny,
     /// 74MB, fast, good accuracy.
     Base,
     /// 244MB, balanced (default).
+    #[default]
     Small,
     /// 769MB, high accuracy.
     Medium,
@@ -110,12 +111,6 @@ impl WhisperModelSize {
             WhisperModelSize::Medium => 769,
             WhisperModelSize::LargeV3 => 1500,
         }
-    }
-}
-
-impl Default for WhisperModelSize {
-    fn default() -> Self {
-        Self::Small
     }
 }
 

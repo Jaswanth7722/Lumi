@@ -250,9 +250,21 @@ impl VoiceDataStatus {
     }
 }
 
+impl Default for VoiceDataStatus {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ScreenDataStatus {
     pub fn new() -> Self {
         Self { stored: false }
+    }
+}
+
+impl Default for ScreenDataStatus {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
