@@ -188,7 +188,6 @@ lumas-core
 
 ## Key Technical Decisions
 
-- **Zero Python**: Lumas is 100% Python-free. The entire stack is Rust + TypeScript, ensuring maximum performance, minimal memory footprint, and no runtime dependency conflicts.
 - **Three-Tier IPC**: Shared memory (sub-100µs) for render commands/state → Unix sockets (< 1ms) for structured messages → In-process channels (nanoseconds) for internal events.
 - **Wire Protocol**: Binary frame format with MessagePack serialization, zstd compression, and ChaCha20-Poly1305 AEAD encryption. Max 256KB payload per frame.
 - **State Machine**: Hybrid typestate-runtime approach — compile-time enforcement for critical paths with runtime extensibility for plugins.
