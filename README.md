@@ -2,7 +2,7 @@
 
 # ⚡ Lumas
 
-**Desktop AI Companion · Pure Rust & TypeScript · Zero Python**
+**Desktop AI Companion · Pure Rust & TypeScript**
 
 [![Rust](https://img.shields.io/badge/rust-2024-edition?style=for-the-badge&logo=rust&logoColor=white&color=%23DEA584)](https://www.rust-lang.org)
 [![TypeScript](https://img.shields.io/badge/typescript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
