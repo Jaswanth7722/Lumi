@@ -1,6 +1,6 @@
 //! Integration tests for the typed event bus.
 
-use lumi_runtime::event::*;
+use lumas_runtime::event::*;
 use uuid::Uuid;
 
 #[tokio::test]

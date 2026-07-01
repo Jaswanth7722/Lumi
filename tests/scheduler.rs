@@ -3,7 +3,7 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::time::Duration;
-use lumi_runtime::scheduler::{Scheduler, TaskPriority, TaskStatus};
+use lumas_runtime::scheduler::{Scheduler, TaskPriority, TaskStatus};
 
 #[tokio::test]
 async fn test_immediate_task_executes() {

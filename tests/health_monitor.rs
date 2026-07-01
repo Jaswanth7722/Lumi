@@ -1,12 +1,12 @@
 //! Integration tests for the health monitor.
 
-use lumi_runtime::health::HealthMonitor;
+use lumas_runtime::health::HealthMonitor;
 
 #[tokio::test]
 async fn test_empty_monitor_returns_unknown() {
     let monitor = HealthMonitor::new();
     let health = monitor.overall_health().await;
-    assert_eq!(health.status, lumi_runtime::service::HealthStatus::Unknown);
+    assert_eq!(health.status, lumas_runtime::service::HealthStatus::Unknown);
 }
 
 #[tokio::test]

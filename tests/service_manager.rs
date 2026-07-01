@@ -2,11 +2,11 @@
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use lumi_runtime::context::RuntimeContext;
-use lumi_runtime::event::EventBus;
-use lumi_runtime::resource::ResourceManager;
-use lumi_runtime::service::*;
-use lumi_runtime::version::FeatureFlags;
+use lumas_runtime::context::RuntimeContext;
+use lumas_runtime::event::EventBus;
+use lumas_runtime::resource::ResourceManager;
+use lumas_runtime::service::*;
+use lumas_runtime::version::FeatureFlags;
 
 struct TestService {
     name: &'static str,

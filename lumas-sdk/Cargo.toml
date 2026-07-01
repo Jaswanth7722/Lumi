@@ -1,0 +1,12 @@
+[package]
+name = "lumas-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "Lumas Developer SDK - Build plugins, tools, and extensions for the Lumas platform"
+
+[dependencies]
+lumas-common = { path = "../lumas-common" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"

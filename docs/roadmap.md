@@ -1,7 +1,7 @@
-# Lumi Platform Roadmap
+# Lumas Platform Roadmap
 
 ## Version 1.1 — Multi-Monitor Support
-- Lumi moves seamlessly between monitors
+- Lumas moves seamlessly between monitors
 - Different workspace panels may appear on different monitors
 - Monitor-specific position memory
 
@@ -17,11 +17,11 @@
 
 ## Version 2.0 — Multimodal Expansion
 - Image and screenshot understanding integrated into conversation
-- Code-aware context: Lumi reads open files in code editors
-- Browser integration: Lumi sees active webpage title and can interact
+- Code-aware context: Lumas reads open files in code editors
+- Browser integration: Lumas sees active webpage title and can interact
 
 ## Version 2.5 — Collaborative Features
-- Two Lumi instances can coordinate on shared tasks
+- Two Lumas instances can coordinate on shared tasks
 - Optional team memory sharing with access controls
 
 ## Long-Term Research Directions
@@ -29,7 +29,7 @@
 | Area | Description |
 |---|---|
 | On-device fine-tuning | Personalized model fine-tuning from user interaction patterns |
-| Predictive presence | Lumi anticipates where user attention will be needed |
-| Ambient intelligence | Lumi monitors long-running tasks and proactively surfaces insights |
+| Predictive presence | Lumas anticipates where user attention will be needed |
+| Ambient intelligence | Lumas monitors long-running tasks and proactively surfaces insights |
 | Physical integration | Notification sync with wearables and smart displays |
 | Voice personality | Voice characteristics that subtly adapt to user's communication style |

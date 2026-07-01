@@ -1,8 +1,8 @@
 //! Integration tests for runtime lifecycle state machine.
 
-use lumi_runtime::bootstrap::Bootstrap;
-use lumi_runtime::event::RuntimeStarted;
-use lumi_runtime::lifecycle::LifecycleManager;
+use lumas_runtime::bootstrap::Bootstrap;
+use lumas_runtime::event::RuntimeStarted;
+use lumas_runtime::lifecycle::LifecycleManager;
 
 #[tokio::test]
 async fn test_bootstrap_succeeds_with_defaults() {
@@ -18,7 +18,7 @@ async fn test_lifecycle_transitions_in_correct_order() {
     assert!(lm.transition_to_running().is_err()); // Can't skip phases
 
     // Advance through all bootstrap phases
-    for phase in lumi_runtime::lifecycle::BootstrapPhase::ALL {
+    for phase in lumas_runtime::lifecycle::BootstrapPhase::ALL {
         assert!(lm.advance_bootstrap(*phase).is_ok());
     }
 

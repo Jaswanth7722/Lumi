@@ -1,0 +1,48 @@
+[package]
+name = "lumas-state"
+version.workspace = true
+edition.workspace = true
+rust-version = "1.85"
+description = "Hierarchical State Machine framework for the Lumas platform — single authority on behavioral state"
+license.workspace = true
+
+[features]
+default = ["typestate", "serde", "async"]
+typestate = []        # Compile-time typestate encoding for Character/Animation
+visualization = []    # DOT/Mermaid graph generation from machine definitions
+serde = ["dep:serde", "dep:serde_json"]   # Serialization of state snapshots
+async = ["dep:tokio", "dep:futures"]      # Async action and guard execution
+
+[dependencies]
+# Core
+lumas-error = { path = "../lumas-error" }
+lumas-performance = { path = "../lumas-performance" }
+
+# Concurrency
+parking_lot = "0.12"
+dashmap = "6"
+
+# Async runtime (feature-gated)
+tokio = { version = "1", features = ["sync", "time", "rt"], optional = true }
+futures = { version = "0.3", optional = true }
+
+# Async trait support
+async-trait = "0.1"
+
+# Data structures
+indexmap = "2"
+
+# Serialization (feature-gated)
+serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
+
+# UUID for session/correlation IDs
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Time
+chrono = "0.4"
+
+# Tracing
+tracing = "0.1"
+
+

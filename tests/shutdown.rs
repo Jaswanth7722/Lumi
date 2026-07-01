@@ -2,9 +2,9 @@
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use lumi_runtime::bootstrap::Bootstrap;
-use lumi_runtime::event::{RuntimeStopped, ShutdownInitiated};
-use lumi_runtime::scheduler::{Scheduler, TaskPriority};
+use lumas_runtime::bootstrap::Bootstrap;
+use lumas_runtime::event::{RuntimeStopped, ShutdownInitiated};
+use lumas_runtime::scheduler::{Scheduler, TaskPriority};
 
 #[tokio::test]
 async fn test_shutdown_emits_shutdown_initiated() {

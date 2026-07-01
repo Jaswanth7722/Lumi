@@ -1,26 +1,26 @@
-# Lumi Visual Design Guidelines
+# Lumas Visual Design Guidelines
 
 ## Color System
 
 ```css
-/* Lumi Design Tokens */
---lumi-crystal-default:   #5BC8F5;  /* Primary crystal blue */
---lumi-crystal-thinking:  #5BC8F5;  /* Same as default, pulsing */
---lumi-crystal-success:   #2ECC71;  /* Success green */
---lumi-crystal-error:     #E74C3C;  /* Error red */
---lumi-crystal-warning:   #F5A623;  /* Warning amber */
---lumi-crystal-memory:    #9B59B6;  /* Memory retrieval purple */
---lumi-crystal-learning:  #F1C40F;  /* Learning gold */
---lumi-crystal-sleep:     #BDC3C7;  /* Sleep grey-white */
+/* Lumas Design Tokens */
+--lumas-crystal-default:   #5BC8F5;  /* Primary crystal blue */
+--lumas-crystal-thinking:  #5BC8F5;  /* Same as default, pulsing */
+--lumas-crystal-success:   #2ECC71;  /* Success green */
+--lumas-crystal-error:     #E74C3C;  /* Error red */
+--lumas-crystal-warning:   #F5A623;  /* Warning amber */
+--lumas-crystal-memory:    #9B59B6;  /* Memory retrieval purple */
+--lumas-crystal-learning:  #F1C40F;  /* Learning gold */
+--lumas-crystal-sleep:     #BDC3C7;  /* Sleep grey-white */
 
---lumi-panel-bg:          rgba(20, 24, 32, 0.88);
---lumi-panel-border:      rgba(91, 200, 245, 0.20);
---lumi-panel-text:        #E8EDF2;
---lumi-panel-text-dim:    #8B9BAA;
---lumi-panel-accent:      var(--lumi-crystal-default);
---lumi-panel-success:     #2ECC71;
---lumi-panel-error:       #E74C3C;
---lumi-panel-warning:     #F5A623;
+--lumas-panel-bg:          rgba(20, 24, 32, 0.88);
+--lumas-panel-border:      rgba(91, 200, 245, 0.20);
+--lumas-panel-text:        #E8EDF2;
+--lumas-panel-text-dim:    #8B9BAA;
+--lumas-panel-accent:      var(--lumas-crystal-default);
+--lumas-panel-success:     #2ECC71;
+--lumas-panel-error:       #E74C3C;
+--lumas-panel-warning:     #F5A623;
 ```
 
 ## Typography

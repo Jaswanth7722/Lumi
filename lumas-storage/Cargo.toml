@@ -1,0 +1,17 @@
+[package]
+name = "lumas-storage"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+lumas-common = { path = "../lumas-common" }
+lumas-ipc = { path = "../lumas-ipc" }
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+parking_lot.workspace = true
+chrono.workspace = true
+uuid.workspace = true

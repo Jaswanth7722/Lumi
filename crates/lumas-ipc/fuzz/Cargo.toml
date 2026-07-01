@@ -1,0 +1,40 @@
+[package]
+name = "lumas-ipc-fuzz"
+version = "0.1.0"
+description = "Fuzz targets for lumas-ipc wire protocol"
+edition.workspace = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+lumas-ipc = { path = ".." }
+bytes = "1"
+uuid = { version = "1", features = ["v7", "serde"] }
+
+
+[[bin]]
+name = "frame_decode"
+path = "fuzz_targets/frame_decode.rs"
+test = false
+bench = false
+doc = false
+
+[[bin]]
+name = "packet_parse"
+path = "fuzz_targets/packet_parse.rs"
+test = false
+bench = false
+doc = false
+
+[[bin]]
+name = "reassembly"
+path = "fuzz_targets/reassembly.rs"
+test = false
+bench = false
+doc = false
+
+[[bin]]
+name = "decompression"
+path = "fuzz_targets/decompression.rs"
+test = false
+bench = false
+doc = false

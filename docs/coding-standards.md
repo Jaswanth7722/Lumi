@@ -51,5 +51,5 @@ pub enum MemoryError {
 
 - Unit tests co-located with implementation (`#[cfg(test)]` modules)
 - Integration tests in `/tests/`
-- Minimum test coverage: 80% line coverage on `lumi-core`
+- Minimum test coverage: 80% line coverage on `lumas-core`
 - All new features require: one happy-path test, one error-path test, one edge-case test

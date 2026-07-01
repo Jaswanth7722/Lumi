@@ -1,27 +1,33 @@
 [workspace]
 resolver = "2"
 members = [
-    "lumi-common",
-    "lumi-ipc",
-    "lumi-core",
-    "lumi-render",
-    "lumi-voice",
-    "lumi-storage",
-    "lumi-plugin-host",
-    "lumi-sdk",
-    "crates/lumi-runtime",
-    "crates/lumi-config",
-    "crates/lumi-logging",
-    "crates/lumi-error",
-    "crates/lumi-performance",
-    "crates/lumi-state",
+    "lumas-common",
+    "lumas-ipc",
+    "lumas-core",
+    "lumas-voice",
+    "lumas-storage",
+    "lumas-plugin-host",
+    "lumas-sdk",
+    "crates/lumas-runtime",
+    "crates/lumas-config",
+    "crates/lumas-logging",
+    "crates/lumas-error",
+    "crates/lumas-performance",
+    "crates/lumas-state",
+    "crates/lumas-process",
+    "crates/lumas-desktop",
+    # "crates/lumas-render",  # Excluded: needs wgpu 0.23 (see crates/lumas-render/Cargo.toml)
+    "crates/lumas-character",
 ]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-license = "MIT"
-repository = "https://github.com/Jaswanth7722/Lumi/"
+rust-version = "1.85"
+authors = ["Lumas Contributors"]
+license = "Apache-2.0"
+repository = "https://github.com/Jaswanth7722/Lumas/"
+description = "Lumas — Desktop AI companion"
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
@@ -37,3 +43,8 @@ anyhow = "1"
 parking_lot = "0.12"
 rand = "0.8"
 dashmap = "6"
+async-trait = "0.1"
+crossbeam = "0.8"
+bytes = "1"
+indexmap = "2"
+tokio-util = { version = "0.7", features = ["codec"] }

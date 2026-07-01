@@ -1,0 +1,185 @@
+# =============================================================================
+# lumas-ipc Cargo.toml
+# =============================================================================
+# Inter-Process Communication Framework for the Lumas Platform.
+#
+# Three transport tiers:
+#   Tier 1 — Shared Memory Ring Buffer (sub-100µs)     — render.command, ai.state
+#   Tier 2 — Unix Domain Socket / Named Pipe (< 1ms)   — memory.*, plugin.*, voice.*
+#   Tier 3 — In-Process Channel (nanoseconds)           — desktop.event (core-internal)
+#
+# The appropriate transport is selected per-channel at registration time based
+# on the channel's declared latency budget and throughput profile.
+# =============================================================================
+
+[package]
+name = "lumas-ipc"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Typed, authenticated, multi-transport IPC framework for the Lumas platform"
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.docs.rs]
+features = ["all"]
+
+# ---------------------------------------------------------------------------
+# Feature flags
+# ---------------------------------------------------------------------------
+[features]
+default = ["shared-memory", "unix-socket", "named-pipe", "tracing-integration", "metrics"]
+
+# Tier 1: Shared memory transport (cross-platform, requires OS shared memory APIs)
+shared-memory = []
+
+# Tier 2: Unix domain sockets (macOS/Linux)
+unix-socket = []
+
+# Tier 2: Windows named pipes
+named-pipe = []
+
+# Optional: zstd compression for large payloads (>16KB)
+compression = ["zstd"]
+
+# Optional: ChaCha20-Poly1305 encryption for sensitive channels
+encryption = ["chacha20poly1305"]
+
+# Optional: OpenTelemetry tracing integration
+tracing-integration = ["opentelemetry"]
+
+# Optional: lumas-performance metrics integration
+metrics = ["lumas-performance"]
+
+# All features enabled (for doc generation)
+all = ["shared-memory", "unix-socket", "named-pipe", "compression", "encryption", "tracing-integration", "metrics"]
+
+# ---------------------------------------------------------------------------
+# Dependencies
+# ---------------------------------------------------------------------------
+
+[dependencies]
+# Workspace crates
+lumas-common = { path = "../../lumas-common" }
+lumas-performance = { path = "../lumas-performance", optional = true }
+lumas-state = { path = "../lumas-state" }
+
+# Async runtime — Tokio with full feature set for I/O, time, sync, process
+tokio = { workspace = true, features = ["full"] }
+
+# Async trait support for Transport, Middleware traits
+async-trait = { workspace = true }
+
+# MessagePack serialization (primary wire format — faster than JSON, smaller than bincode)
+# rmp-serde v0.15+ supports zero-copy deserialization for string fields
+rmp-serde = { workspace = true }
+
+# JSON serialization (debugging, config, fallback)
+serde_json = { workspace = true }
+
+# Core serialization framework
+serde = { workspace = true, features = ["derive", "rc"] }
+
+# UUID v7 generation (time-ordered for log correlation)
+# pin to 1.x for stable API
+uuid = { version = "1", features = ["v7", "serde"] }
+
+# Time-ordered unique IDs for messages
+uuid-time = { package = "uuid", version = "1" }
+
+# Concurrent hashmap for DashMap-style concurrency
+dashmap = { workspace = true }
+
+# Anyhow for error context (internal errors)
+anyhow = { workspace = true }
+
+# Thiserror for derive macros
+thiserror = { workspace = true }
+
+# Tracing for structured logging
+tracing = { workspace = true }
+
+# Lock-free queues for priority message dispatch
+crossbeam = { workspace = true }
+
+# Bitset for replay attack prevention window
+bitvec = "1"
+
+# Zeroize for session key cleanup (zeroes memory on drop)
+zeroize = { version = "1", features = ["zeroize_derive"] }
+
+# HKDF for key derivation during handshake
+hkdf = "0.12"
+
+# SHA-256 for MAC computation
+sha2 = "0.10"
+
+# HMAC for message authentication
+hmac = "0.12"
+
+# X25519 for ECDH key exchange
+x25519-dalek = { version = "2", features = ["reusable_secrets"] }
+
+# Ed25519 for signing (optional)
+ed25519-dalek = "2"
+
+# FNV hash for shared memory schema hashing
+fnv = "1"
+
+# Bytes for zero-copy buffer management
+bytes = { workspace = true }
+
+# Arc<[u8]> for zero-copy payload sharing
+bytes-utils = "0.1"
+
+# IndexMap for ordered state
+indexmap = { workspace = true }
+
+# Optional: compression
+zstd = { version = "0.13", optional = true }
+
+# Optional: ChaCha20-Poly1305 AEAD encryption (replaces separate chacha20 + poly1305)
+chacha20poly1305 = { version = "0.10", optional = true }
+
+# Optional: OpenTelemetry
+opentelemetry = { version = "0.22", optional = true, features = ["trace"] }
+
+# tokio-util for Codec trait implementation (FramedRead/FramedWrite)
+tokio-util = { workspace = true, features = ["codec"] }
+
+# BLAKE3 for checksums (faster than CRC32 on modern hardware, already in dep graph for crash reports)
+blake3 = { version = "1", default-features = false, features = ["traits-preview"] }
+
+# chrono for timestamps
+chrono = { workspace = true }
+
+# rand for nonce generation
+rand = "0.8"
+
+[dev-dependencies]
+# for testing
+criterion = { version = "0.5", features = ["html_reports"] }
+crc32fast = "1"
+tokio-test = "0.4"
+tempfile = "3"
+
+[[bench]]
+name = "ipc_throughput"
+harness = false
+
+[[bench]]
+name = "wire_checksum"
+harness = false
+
+[[bench]]
+name = "wire_encode_decode"
+harness = false
+
+[target.'cfg(unix)'.dependencies]
+# Unix-specific: tokio's Unix domain socket support (included in tokio "full")
+tokio = { workspace = true, features = ["net"] }
+
+[target.'cfg(windows)'.dependencies]
+# Windows-specific: named pipe support
+tokio = { workspace = true, features = ["net", "process"] }
